@@ -1,0 +1,49 @@
+{
+  "name": "@jackieyang/reactgenie-dsl",
+  "version": "0.0.2",
+  "description": "A natural language parser based on a large language model",
+  "scripts": {
+    "prepare": "peggy lib/dsl/parser.pegjs -o lib/dsl/parser.gen.js && tsc",
+    "test": "jest dist",
+    "doc": "typedoc lib/dsl/index.ts"
+  },
+  "keywords": [
+    "natrual language",
+    "parser",
+    "language model"
+  ],
+  "author": "Jackie Yang <jackie@jackieyang.me>",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "openai": "^3.0.0",
+    "peggy": "^2.0.1",
+    "typescript": "^4.7.4"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.18.10",
+    "@babel/preset-typescript": "^7.18.6",
+    "@types/jest": "^28.1.6",
+    "jest": "^28.1.3",
+    "ts-jest": "^28.0.7",
+    "typedoc": "^0.23.10"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "lib/**",
+    "dist/**"
+  ],
+  "directories": {
+    "doc": "docs",
+    "lib": "lib",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/StanfordHCI/ReactGenieDSL.git"
+  },
+  "bugs": {
+    "url": "https://github.com/StanfordHCI/ReactGenieDSL/issues"
+  },
+  "homepage": "https://github.com/StanfordHCI/ReactGenieDSL#readme"
+}
