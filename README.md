@@ -1,4 +1,4 @@
-ReactGenieDSL: language parser and interpreter for MultiReact
+ReactGenieDSL: language parser and interpreter for ReactGenie
 =========================================================
 Jackie Yang (jackie@jackieyang.me)
 ----------------------------------
