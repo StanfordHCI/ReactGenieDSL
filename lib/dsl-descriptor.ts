@@ -4,8 +4,17 @@ export class GenieObject {
     this._initParams = initParams;
   }
 
+  // noinspection JSUnusedGlobalSymbols
   _getConstructorParams(): any {
     return this._initParams;
+  }
+
+  static CreateObject(...args: any[]): GenieObject {
+    return this._createObject(...args);
+  }
+
+  static GetObject(...args: any[]): GenieObject {
+    return null;
   }
 
   description(): {} {
@@ -14,6 +23,7 @@ export class GenieObject {
 }
 
 export class ParamDescriptor {
+  // noinspection JSUnusedGlobalSymbols
   constructor(public name: string, public type: string, public required: boolean = true, public defaultValue?: any) {
   }
   description(): string {
@@ -29,6 +39,14 @@ export class FuncDescriptor {
       (this.isStatic? `static ` : "") +
       `${this.returnType} ${this.func_name}(${this.parameters.map(p => p.description()).join(", ")});`;
   }
+
+  isSame(another: FuncDescriptor) {
+    return this.func_name === another.func_name &&
+        this.returnType === another.returnType &&
+        this.isStatic === another.isStatic &&
+        this.parameters.length === another.parameters.length &&
+        this.parameters.every((p, i) => p.name === another.parameters[i].name && p.type === another.parameters[i].type);
+  }
 }
 
 export class FieldDescriptor {
@@ -40,21 +58,32 @@ export class FieldDescriptor {
       (this.isStatic? `static ` : "") +
       `${this.fieldType} ${this.field};`;
   }
+
+  isSame(another: FieldDescriptor) {
+    return this.field === another.field &&
+        this.fieldType === another.fieldType &&
+        this.isStatic === another.isStatic;
+  }
 }
 
 export class ClassDescriptor<T extends GenieObject> {
+  public functions: Set<FuncDescriptor>;
+  public fields: Set<FieldDescriptor>;
+
   constructor(
     public className: string,
-    public functions: FuncDescriptor[],
-    public fields: FieldDescriptor[],
+    functions: FuncDescriptor[],
+    fields: FieldDescriptor[],
     public classConstructor: { new(...any): T }
   ) {
+    this.functions = new Set(functions);
+    this.fields = new Set(fields);
   }
 
   description(): string {
     return `class ${this.className} {\n` +
-      this.fields.map(f => "\t" + f.description()).join("\n") + "\n" +
-      this.functions.map(f => "\t" + f.description()).join("\n") + "\n" +
+      Array.from(this.fields).map(f => "\t" + f.description()).join("\n") + "\n" +
+      Array.from(this.functions).map(f => "\t" + f.description()).join("\n") + "\n" +
       `}`;
   }
 }

@@ -1,117 +1,9 @@
 import {ClassDescriptor, FieldDescriptor, FuncDescriptor, GenieObject, ParamDescriptor} from "../dsl-descriptor";
 import {ExampleParse} from "../nl/prompt-gen";
+import {float, GenieClass, GenieFunction, GenieKey, GenieProperty, int} from "../decorators";
 
 export let recentBooking = null;
 
-export class Restaurant extends GenieObject {
-  static _all: Restaurant[] = undefined
-  public orders: Order[] = [];
-  static all(): Restaurant[] {
-    if (this._all === undefined) {
-      const mcDonald = new Restaurant("McDonald's", [], 4, 2, "Fast Food", "123 Main St, Mountain view, USA");
-      const kfc = new Restaurant("KFC", [], 3, 1, "Fast Food", "123 Main St, Palo Alto, USA");
-      const pizzaHut = new Restaurant("Pizza Hut", [], 4, 2, "Fast Food", "123 Main St, Palo Alto, USA");
-      const burgerKing = new Restaurant("Burger King", [], 4, 2, "Fast Food", "123 Main St, Mountain View, USA");
-      const taste = new Restaurant("Taste", [], 5, 3, "Chinese", "123 Main St, Palo Alto, USA");
-      const orensHummus = new Restaurant("Oren's Hummus", [], 4, 2, "Middle Eastern", "123 Main St, Mountain View, USA");
-      const steam = new Restaurant("Steam", [], 4, 2, "Chinese", "123 Main St, Palo Alto, USA");
-
-      mcDonald.createFood("Hamburger", 5);
-      mcDonald.createFood("Cheeseburger", 6);
-      mcDonald.createFood("McFlurry", 3);
-      mcDonald.createFood("McChicken", 4);
-      mcDonald.createFood("McDouble", 4);
-      mcDonald.createFood("Coca Cola Coke", 2);
-      mcDonald.createOrder(
-        new DateTime({ year: 2020, month: 1, day: 1, hour: 12, minute: 0 }),
-        [mcDonald.menu[0], mcDonald.menu[1]]
-      );
-      mcDonald.createOrder(
-        new DateTime({ year: 2020, month: 1, day: 1, hour: 13, minute: 0 }),
-        [mcDonald.menu[2], mcDonald.menu[3]]
-      );
-      mcDonald.createOrder(
-        new DateTime({ year: 2020, month: 2, day: 1, hour: 14, minute: 0 }),
-        [mcDonald.menu[4], mcDonald.menu[5]]
-      );
-
-      kfc.createFood("Chicken", 5);
-      kfc.createFood("Fries", 2);
-      kfc.createFood("Pepsi Coke", 2);
-      kfc.createOrder(
-        new DateTime({ year: 2020, month: 1, day: 1, hour: 12, minute: 0 }),
-        [kfc.menu[0], kfc.menu[1]]
-      )
-
-      this._all = [
-        mcDonald,
-        kfc,
-        pizzaHut,
-        burgerKing,
-        taste,
-        orensHummus,
-        steam
-      ]
-    }
-    return this._all;
-  }
-
-  description(): {} {
-    return {
-      name: this.name,
-      cuisine: this.cuisine,
-      rating: this.rating,
-      priceGrade: this.priceGrade,
-      address: this.address
-    };
-  }
-
-  createFood(name: string, price: number) {
-    const food = new Food(name, price, this)
-    this.menu.push(food);
-    return food
-  }
-
-  createOrder(dateTime: DateTime, foods: Food[]) {
-    const order = new Order(dateTime, foods, this);
-    this.orders.push(order);
-    return order;
-  }
-
-  static current(): Restaurant {
-    return this.all()[0];
-  }
-
-  book({dateTime}: {dateTime: DateTime}) {
-    console.log(`${this.name} is booking for ${dateTime.toString()}`);
-    recentBooking = `${this.name} is booking for ${dateTime.toString()}`;
-  }
-
-
-  constructor(public name: string, public menu: Food[], public rating: number = 0, public priceGrade: number = 0, public cuisine: string = "", public address: string = "") {
-    super({name: name});
-  }
-
-  static ClassDescriptor =
-    new ClassDescriptor<Restaurant>(
-      "Restaurant",
-      [
-        new FuncDescriptor("all", [], "Restaurant[]", true, "All active restaurants"),
-        new FuncDescriptor("current", [], "Restaurant", true, "The current restaurant"),
-        new FuncDescriptor("book", [new ParamDescriptor("dateTime", "DateTime")], "void", false, "Book a table for a given date time")
-      ],
-      [
-        new FieldDescriptor("name", "string", false),
-        new FieldDescriptor("menu", "Food[]", false),
-        new FieldDescriptor("rating", "int", false),
-        new FieldDescriptor("priceGrade", "int", false),
-        new FieldDescriptor("cuisine", "string", false),
-        new FieldDescriptor("address", "string", false),
-        new FieldDescriptor("orders", "Order[]", false),
-      ],
-      Restaurant
-    );
-}
 
 export class Food extends GenieObject {
   static _all: Food[] = [];
@@ -131,7 +23,7 @@ export class Food extends GenieObject {
     };
   }
 
-  static ClassDescriptor = new ClassDescriptor<Food>(
+  static _ClassDescriptor = new ClassDescriptor<Food>(
     "Food",
     [
         new FuncDescriptor("all", [], "Food[]", true, "All foods")
@@ -144,6 +36,8 @@ export class Food extends GenieObject {
     Food
   );
 }
+
+
 
 export class Order extends GenieObject {
   static _all: Order[] = [];
@@ -185,7 +79,7 @@ export class Order extends GenieObject {
     };
   }
 
-  static ClassDescriptor = new ClassDescriptor<Order>(
+  static _ClassDescriptor = new ClassDescriptor<Order>(
     "Order",
     [
       new FuncDescriptor("addFoods", [new ParamDescriptor("foods", "Food[]")], "void", false, "Add a list of foods to the order"),
@@ -306,7 +200,7 @@ export class DateTime extends GenieObject {
     return `${this.year}-${this.month}-${this.day} ${this.hour}:${this.minute}`;
   }
 
-  static ClassDescriptor = new ClassDescriptor<DateTime>(
+  static _ClassDescriptor = new ClassDescriptor<DateTime>(
     "DateTime",
     [
       new FuncDescriptor("addDateOffset", [
@@ -355,11 +249,147 @@ export class DateTime extends GenieObject {
   );
 }
 
+@GenieClass("A restaurant")
+export class Restaurant extends GenieObject {
+  static _all: Restaurant[] = undefined
+  @GenieProperty("Past orders of the restaurant")
+  public orders: Order[] = [];
+
+  @GenieFunction("Get all restaurants")
+  static all(): Restaurant[] {
+    if (this._all === undefined) {
+      const mcDonald = Restaurant.CreateObject({name: "McDonald's", menu: [], rating: 4, priceGrade: 2, cuisine: "Fast Food", address: "123 Main St, Mountain view, USA"});
+      const kfc = Restaurant.CreateObject({name: "KFC", menu: [], rating: 3, priceGrade: 1, cuisine: "Fast Food", address: "123 Main St, Palo Alto, USA"});
+      const pizzaHut = Restaurant.CreateObject({name: "Pizza Hut", menu: [], rating: 4, priceGrade: 2, cuisine: "Fast Food", address: "123 Main St, Palo Alto, USA"});
+      const burgerKing = Restaurant.CreateObject({name: "Burger King", menu: [], rating: 4, priceGrade: 2, cuisine: "Fast Food", address: "123 Main St, Mountain View, USA"});
+      const taste = Restaurant.CreateObject({name: "Taste", menu: [], rating: 5, priceGrade: 3, cuisine: "Chinese", address: "123 Main St, Palo Alto, USA"});
+      const orensHummus = Restaurant.CreateObject({name: "Oren's Hummus", menu: [], rating: 4, priceGrade: 2, cuisine: "Middle Eastern", address: "123 Main St, Mountain View, USA"});
+      const steam = Restaurant.CreateObject({name: "Steam", menu: [], rating: 4, priceGrade: 2, cuisine: "Chinese", address: "123 Main St, Palo Alto, USA"});
+
+      mcDonald.createFood("Hamburger", 5);
+      mcDonald.createFood("Cheeseburger", 6);
+      mcDonald.createFood("McFlurry", 3);
+      mcDonald.createFood("McChicken", 4);
+      mcDonald.createFood("McDouble", 4);
+      mcDonald.createFood("Coca Cola Coke", 2);
+      mcDonald.createOrder(
+        new DateTime({ year: 2020, month: 1, day: 1, hour: 12, minute: 0 }),
+        [mcDonald.menu[0], mcDonald.menu[1]]
+      );
+      mcDonald.createOrder(
+        new DateTime({ year: 2020, month: 1, day: 1, hour: 13, minute: 0 }),
+        [mcDonald.menu[2], mcDonald.menu[3]]
+      );
+      mcDonald.createOrder(
+        new DateTime({ year: 2020, month: 2, day: 1, hour: 14, minute: 0 }),
+        [mcDonald.menu[4], mcDonald.menu[5]]
+      );
+
+      kfc.createFood("Chicken", 5);
+      kfc.createFood("Fries", 2);
+      kfc.createFood("Pepsi Coke", 2);
+      kfc.createOrder(
+        new DateTime({ year: 2020, month: 1, day: 1, hour: 12, minute: 0 }),
+        [kfc.menu[0], kfc.menu[1]]
+      )
+
+      this._all = [
+        mcDonald,
+        kfc,
+        pizzaHut,
+        burgerKing,
+        taste,
+        orensHummus,
+        steam
+      ]
+    }
+    return this._all;
+  }
+
+  description(): {} {
+    return {
+      name: this.name,
+      cuisine: this.cuisine,
+      rating: this.rating,
+      priceGrade: this.priceGrade,
+      address: this.address
+    };
+  }
+
+  createFood(name: string, price: float) {
+    const food = new Food(name, price, this)
+    this.menu.push(food);
+    return food
+  }
+
+  createOrder(dateTime: DateTime, foods: Food[]) {
+    const order = new Order(dateTime, foods, this);
+    this.orders.push(order);
+    return order;
+  }
+
+  @GenieFunction("Get the current restaurant")
+  static current(): Restaurant {
+    return this.all()[0];
+  }
+
+  @GenieFunction("Book a table for a given date time")
+  book({dateTime}: {dateTime: DateTime}) : void {
+    console.log(`${this.name} is booking for ${dateTime.toString()}`);
+    recentBooking = `${this.name} is booking for ${dateTime.toString()}`;
+  }
+
+  @GenieKey
+  @GenieProperty("Name of the restaurant")
+  public name: string;
+  @GenieProperty("Menu of the restaurant")
+  public menu: Food[];
+  @GenieProperty("Rating of the restaurant")
+  public rating: int;
+  @GenieProperty("Price grade of the restaurant")
+  public priceGrade: float;
+  @GenieProperty("Cuisine of the restaurant")
+  public cuisine: string;
+  @GenieProperty("Address of the restaurant")
+  public address: string;
+
+  constructor({name, menu, rating = 0, priceGrade = 0, cuisine = "", address=""} : {name: string, menu: Food[], rating: number, priceGrade: number, cuisine: string, address: string}) {
+    super({name: name});
+    this.name = name;
+    this.menu = menu;
+    this.rating = rating;
+    this.priceGrade = priceGrade;
+    this.cuisine = cuisine;
+    this.address = address;
+  }
+
+  static _ClassDescriptor =
+    new ClassDescriptor<Restaurant>(
+      "Restaurant",
+      [
+        new FuncDescriptor("all", [], "Restaurant[]", true, "All active restaurants"),
+        new FuncDescriptor("current", [], "Restaurant", true, "The current restaurant"),
+        new FuncDescriptor("book", [new ParamDescriptor("dateTime", "DateTime")], "void", false, "Book a table for a given date time")
+      ],
+      [
+        new FieldDescriptor("name", "string", false),
+        new FieldDescriptor("menu", "Food[]", false),
+        new FieldDescriptor("rating", "int", false),
+        new FieldDescriptor("priceGrade", "int", false),
+        new FieldDescriptor("cuisine", "string", false),
+        new FieldDescriptor("address", "string", false),
+        new FieldDescriptor("orders", "Order[]", false),
+      ],
+      Restaurant
+    );
+}
+
+
 export const allDescriptors = [
-  Restaurant.ClassDescriptor,
-  Food.ClassDescriptor,
-  Order.ClassDescriptor,
-  DateTime.ClassDescriptor
+  Restaurant._ClassDescriptor,
+  Food._ClassDescriptor,
+  Order._ClassDescriptor,
+  DateTime._ClassDescriptor
 ]
 
 export const classDescriptions = allDescriptors.map(d => d.description());
