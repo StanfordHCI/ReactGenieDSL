@@ -1,7 +1,9 @@
 import {NlParser} from "../nl-parser";
 import {BasicPromptGen} from "../prompt-gen";
 import {classDescriptions, examples} from "../../__test__/example_descriptor";
+import {initGenie} from "../../decorators";
 
+initGenie();
 jest.setTimeout(30000);
 
 test('Parser basics', async () => {

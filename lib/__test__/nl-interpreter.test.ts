@@ -1,5 +1,7 @@
 import {NlInterpreter} from "../nl-interpreter";
 import {allDescriptors, examples} from "./example_descriptor";
+import {initGenie} from "../decorators";
+initGenie();
 
 jest.setTimeout(30000);
 
