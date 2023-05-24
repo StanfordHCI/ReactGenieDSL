@@ -44,3 +44,25 @@ test("Restaurant Descriptor", async () => {
     restaurant2.rating = 3;
     assert.equal(restaurant1.rating, 3);
 });
+
+test("Food Descriptor", async () => {
+    initGenie();
+    const { Food } = await import("../../__test__/example_descriptor");
+    compareClassDescriptor(Food.ClassDescriptor, Food._ClassDescriptor);
+    Food.all();
+    const foodItem1 = Food.GetObject({
+        name: "Hamburger",
+        price: 5.99,
+        restaurant: {name: "McDonald's"}
+    });
+    const foodItem2 = Food.GetObject({
+        name: "Hamburger",
+        price: 5.99,
+        restaurant: {name: "McDonald's"}
+    });
+    foodItem2.price = 6.99;
+    assert.equal(foodItem1.price, 6.99);
+    foodItem2.price = 5.99;
+    assert.equal(foodItem1.price, 5.99);
+});
+
