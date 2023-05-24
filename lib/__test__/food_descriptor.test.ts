@@ -2,6 +2,8 @@ import {ClassDescriptor, FieldDescriptor, FuncDescriptor, GenieObject, ParamDesc
 import {DateTime} from "./example_descriptor";
 import {NlInterpreter} from "../nl-interpreter";
 import stateJson from "./food_descriptor.state.json";
+import {initGenie} from "../decorators";
+initGenie();
 
 export interface SanityDish {
     Price: number,
@@ -201,7 +203,7 @@ export const GenieClassDescriptors = [
     GenieRestaurant.ClassDescriptor,
     GenieDish.ClassDescriptor,
     GenieOrder.ClassDescriptor,
-    DateTime.ClassDescriptor
+    DateTime._ClassDescriptor
 ];
 export const GenieClassesExamples = [
     {
@@ -214,7 +216,7 @@ export const GenieClassesExamples = [
     },
     {
         user_utterance: "order fries from current restaurant",
-        example_parsed: "Order.addFodds(dishes: [Restaurant.current().dishes.matching(field: .name, value: \"fries\")])\n",
+        example_parsed: "Order.addFoods(dishes: [Restaurant.current().dishes.matching(field: .name, value: \"fries\")])\n",
     },
     {
         user_utterance: "add two hamburgers",

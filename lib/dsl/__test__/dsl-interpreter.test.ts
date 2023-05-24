@@ -1,5 +1,7 @@
 import {DslInterpreter} from '../dsl-interpreter';
 import {allDescriptors, recentBooking, Restaurant} from "../../__test__/example_descriptor";
+import {initGenie} from "../../decorators";
+initGenie();
 
 test('Basic function call', () => {
     const interpreter = new DslInterpreter(allDescriptors);

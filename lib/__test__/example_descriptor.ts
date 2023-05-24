@@ -51,15 +51,17 @@ export class Food extends GenieObject {
 }
 
 
-
+@GenieClass("An Order")
 export class Order extends GenieObject {
   static _all: Order[] = [];
+  @GenieFunction("Get all orders")
   static all(): Order[] {
     return Order._all;
   }
 
   static _current: Order = undefined;
 
+  @GenieFunction("Get the current order")
   static current(): Order {
     if (this._current === undefined) {
       this._current = new Order(DateTime.fromDate(new Date()), [], null);
@@ -72,14 +74,17 @@ export class Order extends GenieObject {
     Order._all.push(this);
   }
 
+  @GenieFunction("Add foods to the order")
   addFoods({foods}: {foods: Food[]}) {
     this.foods.push(...foods);
   }
 
+  @GenieFunction("Remove foods from the order")
   removeFoods({foods}: {foods: Food[]}) {
     this.foods = this.foods.filter(f => !foods.includes(f));
   }
 
+  @GenieFunction("Place the order")
   placeOrder() {
     this.restaurant.orders.push(this);
   }

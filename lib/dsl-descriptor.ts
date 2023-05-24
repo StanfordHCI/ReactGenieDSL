@@ -9,17 +9,25 @@ export class GenieObject {
     return this._initParams;
   }
 
-  static CreateObject(...args: any[]): GenieObject {
+  // placeholder, should be replaced by GenieClass decorator
+  static _createObject<T extends typeof GenieObject>(this: T, ...args: any[]): InstanceType<T> {
+    throw new Error("Not implemented. Did you forget to decorate the class with @GenieClass?");
+  }
+
+  static CreateObject<T extends typeof GenieObject>(this: T, ...args: any[]): InstanceType<T> {
     return this._createObject(...args);
   }
 
-  static GetObject(...args: any[]): GenieObject {
-    return null;
+  // placeholder, should be replaced by GenieClass decorator
+  static GetObject<T extends typeof GenieObject>(this: T, ...args: any[]): InstanceType<T> {
+    throw new Error("Not implemented. Did you forget to decorate the class with @GenieClass?");
   }
 
   description(): {} {
     return this;
   }
+
+  static ClassDescriptor: ClassDescriptor<GenieObject>;
 }
 
 export class ParamDescriptor {

@@ -3,8 +3,8 @@
   "version": "0.0.3",
   "description": "A natural language parser based on a large language model",
   "scripts": {
-    "prepare": "peggy lib/dsl/parser.pegjs -o lib/dsl/parser.gen.js && tsc",
-    "test": "jest dist",
+    "prepare": "peggy lib/dsl/parser.pegjs -o lib/dsl/parser.gen.js",
+    "test": "jest",
     "doc": "typedoc lib/dsl/index.ts"
   },
   "keywords": [

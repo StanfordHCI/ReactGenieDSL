@@ -9,8 +9,8 @@ export type float = number;
 export const AllGenieObjects: { [key: string]: any } = {};
 
 export type GenieClassModifier = (target: any) => void;
-export type GenieFunctionModifier = (target: any, propertyKey: string) => void;
-export type GeniePropertyModifier = (target: any, propertyKey: string) => void;
+export type GenieFunctionModifier = (target: any, functionKey: string, isStatic: boolean) => void;
+export type GeniePropertyModifier = (target: any, propertyKey: string, isStatic: boolean) => void;
 
 let genieClassModifier: GenieClassModifier = undefined;
 let genieFunctionModifier: GenieFunctionModifier = undefined;
@@ -24,7 +24,25 @@ export function initGenie({genieClassModifier, genieFunctionModifier, geniePrope
     geniePropertyModifier?: GeniePropertyModifier
 } = {}) {
     if (genieCalledBeforeInit) {
-        throw new Error("initGenie must be called before any Genie decorators");
+        // call modifiers for existing classes
+        for (let className in AllGenieObjects) {
+            const target = AllGenieObjects[className];
+            if (genieClassModifier) {
+                genieClassModifier(target);
+            }
+            // for all properties
+            for (let propertyDescriptor of target.ClassDescriptor.fields) {
+                if (geniePropertyModifier) {
+                    geniePropertyModifier(target, propertyDescriptor.field, propertyDescriptor.isStatic);
+                }
+            }
+            // for all functions
+            for (let functionDescriptor of target.ClassDescriptor.functions) {
+                if (genieFunctionModifier) {
+                    genieFunctionModifier(target, functionDescriptor.func_name, functionDescriptor.isStatic);
+                }
+            }
+        }
     }
     if (genieClassModifier) {
         this.genieClassModifier = genieClassModifier;
@@ -46,19 +64,15 @@ interface ClassWithDescriptor<T extends GenieObject> {
 export function GenieClass(comment: string) {
     return function (target: any) {
         genieCalledBeforeInit = true;
-        console.log("GenieClass decorator called on " + target.name);
+        console.debug("GenieClass decorator called on " + target.name);
 
         target.prototype.comment = comment;
         if (!target.ClassDescriptor) {
             target.ClassDescriptor = new ClassDescriptor(target.name, target.__class_descriptor_functions, target.__class_descriptor_properties, target);
         }
 
-        // replace original constructor
-        const original = target;
-
-        originalClasses[target.name] = original;
         target._createObject = function (...args: any[]) {
-            const obj = new original(...args);
+            const obj = new target(...args);
             // find all fields
             let allFields = Object.getOwnPropertyNames(obj);
             // filter out functions
@@ -110,17 +124,6 @@ export function GenieClass(comment: string) {
             objects[target.name][obj[keyField]] = obj;
             return obj;
         }
-        // const newConstructor = newTarget.prototype.constructor;
-        // newTarget.prototype = original.prototype;
-        // newTarget.prototype.constructor = newConstructor;
-        // newTarget.prototype.constructor = newTarget;
-        // // copy over all static methods
-        // Object.getOwnPropertyNames(original).forEach((key) => {
-        //     // skip read-only properties
-        //     if (!(key === "length" || key === "prototype" || key === "name" || key === "constructor")) {
-        //         newTarget[key] = original[key];
-        //     }
-        // });
 
         // add a static method to get all objects of this type
         target.GetObject = function (key: {}) {
@@ -169,7 +172,7 @@ export function GenieFunction(comment: string = "") {
     return function (target: any, propertyKey: string) {
         genieCalledBeforeInit = true;
         if (!target.ClassDescriptor) {
-            console.log("GenieFunction decorator called on " + target.constructor.name + "." + propertyKey);
+            console.debug("GenieFunction decorator called on " + target.constructor.name + "." + propertyKey);
             const paramTypes = Reflect.getMetadata("design:paramtypes", target, propertyKey);
             const returnType = Reflect.getMetadata("design:returntype", target, propertyKey);
             const isStaticMeta = Reflect.getMetadata("design:is_static", target, propertyKey);
@@ -208,10 +211,10 @@ export function GenieFunction(comment: string = "") {
             if (!targetClass.__class_descriptor_functions) {
                 targetClass.__class_descriptor_functions = [];
             }
-            console.log(`pushing function descriptor ${funcDescriptor}`);
+            console.debug(`pushing function descriptor ${funcDescriptor}`);
             targetClass.__class_descriptor_functions.push(funcDescriptor);
             if (genieFunctionModifier) {
-                genieFunctionModifier(target, propertyKey);
+                genieFunctionModifier(target, propertyKey, isStatic);
             }
         }
     };
@@ -219,14 +222,14 @@ export function GenieFunction(comment: string = "") {
 }
 
 export function GenieKey (target: any, propertyKey: string) {
-    console.log("GenieKey decorator called on " + target.constructor.name + "." + propertyKey);
+    console.debug("GenieKey decorator called on " + target.constructor.name + "." + propertyKey);
     target.genieKey = propertyKey;
 }
 
 export function GenieProperty(comment: string = "") {
     return function (target: any, propertyKey: string) {
         genieCalledBeforeInit = true;
-        console.log("GenieProperty decorator called on " + target.constructor.name + "." + propertyKey);
+        console.debug("GenieProperty decorator called on " + target.constructor.name + "." + propertyKey);
         const typeObj = Reflect.getMetadata("design:type", target, propertyKey);
         const isStaticMeta = Reflect.getMetadata("design:is_static", target, propertyKey);
         const isStatic = isStaticMeta === true;
@@ -237,10 +240,10 @@ export function GenieProperty(comment: string = "") {
             targetClass.__class_descriptor_properties = [];
         }
         const propertyDescriptor = new FieldDescriptor(propertyKey, type, isStatic, comment)
-        console.log(`pushing property descriptor: ${propertyDescriptor}`);
+        console.debug(`pushing property descriptor: ${propertyDescriptor}`);
         targetClass.__class_descriptor_properties.push(propertyDescriptor);
         if (geniePropertyModifier) {
-            geniePropertyModifier(target, propertyKey);
+            geniePropertyModifier(target, propertyKey, isStatic);
         }
     };
 }

@@ -285,7 +285,7 @@ export class DslInterpreter {
             const className = isObject ? parent.objectType : parent.value;
             const classDescriptor = this.classDescriptors.find(c => c.className === className);
             console.assert(classDescriptor != null);
-            const fieldDescriptor = classDescriptor.fields.find(f => f.field === ast.access);
+            const fieldDescriptor = Array.from(classDescriptor.fields).find(f => f.field === ast.access);
             // we can only access if the field is static or the parent is an object
             console.assert(isObject || fieldDescriptor.isStatic)
             const fieldValue = isObject ?
@@ -372,12 +372,12 @@ export class DslInterpreter {
             switch (env.type) {
                 case "class":
                     funcDescriptor =
-                        this.classDescriptors.find(c => c.className === env.value).functions.find(f => f.func_name === ast.func_name);
+                        Array.from(this.classDescriptors.find(c => c.className === env.value).functions).find(f => f.func_name === ast.func_name);
                     console.assert(funcDescriptor.isStatic);
                     break;
                 case "object":
                     funcDescriptor =
-                        this.classDescriptors.find(c => c.className === env.objectType).functions.find(f => f.func_name === ast.func_name);
+                        Array.from(this.classDescriptors.find(c => c.className === env.objectType).functions).find(f => f.func_name === ast.func_name);
                     break;
                 // deal with array functions (`matching`, `between`, `equals`)
                 case "array":
@@ -394,7 +394,7 @@ export class DslInterpreter {
         } else {
             // function is class constructor
             const classDescriptor = this.classDescriptors.find(c => c.className === ast.func_name);
-            funcDescriptor = classDescriptor.functions.find(f => f.func_name === "constructor");
+            funcDescriptor = Array.from(classDescriptor.functions).find(f => f.func_name === "constructor");
         }
         // reformat the parameters to match the function signature
         let matchedParameters = {};
