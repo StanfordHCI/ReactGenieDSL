@@ -4,14 +4,27 @@ import {float, GenieClass, GenieFunction, GenieKey, GenieProperty, int} from "..
 
 export let recentBooking = null;
 
-
+@GenieClass("A food item")
 export class Food extends GenieObject {
+  @GenieFunction("Get all food items")
   static _all: Food[] = [];
   static all(): Food[] {
     return Food._all;
   };
-  constructor(public name: string, public price: number, public restaurant: Restaurant) {
+
+  @GenieKey
+  @GenieProperty("Name of the food item")
+  public name: string;
+  @GenieProperty("Price of the food item")
+  public price: float;
+  @GenieProperty("Restaurant of the food item")
+  public restaurant: Restaurant;
+
+  constructor({name, price, restaurant} : {name: string, price: float, restaurant: Restaurant}) {
     super({name: name});
+    this.name = name;
+    this.price = price;
+    this.restaurant = restaurant;
     Food._all.push(this);
   }
 
@@ -30,7 +43,7 @@ export class Food extends GenieObject {
     ],
     [
       new FieldDescriptor("name", "string", false),
-      new FieldDescriptor("price", "int", false),
+      new FieldDescriptor("price", "float", false),
       new FieldDescriptor("restaurant", "Restaurant", false, "The restaurant this food is served at")
     ],
     Food
