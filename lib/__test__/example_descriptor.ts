@@ -1,5 +1,5 @@
 import {ClassDescriptor, FieldDescriptor, FuncDescriptor, GenieObject, ParamDescriptor} from "../dsl-descriptor";
-import {ExampleParse} from "../nl/prompt-gen";
+import {ExampleParse} from "../nl";
 import {float, GenieClass, GenieFunction, GenieKey, GenieProperty, int, LazyType} from "../decorators";
 
 export let recentBooking = null;
@@ -57,7 +57,7 @@ export class DateTime extends GenieObject {
   // custom comparator for sorting
 
   static compare(a: DateTime, b: DateTime) {
-    return a.date - b.date
+    return a.date.getTime() - b.date.getTime();
   }
 
   constructor({year = undefined, month = undefined, day = undefined, hour = undefined, minute = undefined}: { year?: number, month?: number, day?: number, hour?: number, minute?: number }) {

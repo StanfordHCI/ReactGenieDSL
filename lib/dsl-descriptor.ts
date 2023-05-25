@@ -12,6 +12,10 @@ export class GenieObject {
     return {name: this[name]}
   }
 
+  // placeholder, other code that should run after initGenie
+  setup() {
+  }
+
   // placeholder, should be replaced by GenieClass decorator
   static _createObject<T extends typeof GenieObject>(this: T, ...args: any[]): InstanceType<T> {
     throw new Error("Not implemented. Did you forget to decorate the class with @GenieClass?");

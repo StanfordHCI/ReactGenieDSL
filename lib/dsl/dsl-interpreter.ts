@@ -287,6 +287,7 @@ export class DslInterpreter {
             console.assert(classDescriptor != null);
             const fieldDescriptor = Array.from(classDescriptor.fields).find(f => f.field === ast.access);
             // we can only access if the field is static or the parent is an object
+            // TODO: print error message
             console.assert(isObject || fieldDescriptor.isStatic)
             const fieldValue = isObject ?
                 this.strip(parent)[fieldDescriptor.field] :
