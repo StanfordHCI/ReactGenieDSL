@@ -67,3 +67,17 @@ test("Food Descriptor", async () => {
     assert.equal(foodItem1.price, 5.99);
 });
 
+test("Order Descriptor", async () => {
+    initGenie();
+    const { Order, Restaurant, DateTime } = await import("../../__test__/example_descriptor");
+    compareClassDescriptor(Order.ClassDescriptor, Order._ClassDescriptor);
+    Order.all();
+    const mcdonalds = Restaurant.GetObject({name: "McDonald's"});
+    const order1 = mcdonalds.orders[0];
+    const order2 = mcdonalds.orders[1];
+    order2.dateTime = new DateTime({ year: 2023, month: 1, day: 1, hour: 13, minute: 0 }),
+        assert.equal(order1.dateTime, new DateTime({ year: 2023, month: 1, day: 1, hour: 13, minute: 0 }));
+    order2.dateTime = new DateTime({ year: 2023, month: 1, day: 2, hour: 13, minute: 0 }),
+        assert.equal(order1.dateTime, new DateTime({ year: 2023, month: 1, day: 2, hour: 13, minute: 0 }));
+});
+
