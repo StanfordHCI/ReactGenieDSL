@@ -52,14 +52,10 @@ test("Food Descriptor", async () => {
     compareClassDescriptor(Food.ClassDescriptor, Food._ClassDescriptor);
     Food.all();
     const foodItem1 = Food.GetObject({
-        name: "Hamburger",
-        price: 5.99,
-        restaurant: {name: "McDonald's"}
+        name: "Hamburger"
     });
     const foodItem2 = Food.GetObject({
-        name: "Hamburger",
-        price: 5.99,
-        restaurant: {name: "McDonald's"}
+        name: "Hamburger"
     });
     foodItem2.price = 6.99;
     assert.equal(foodItem1.price, 6.99);

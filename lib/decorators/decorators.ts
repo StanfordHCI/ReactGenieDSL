@@ -61,6 +61,8 @@ interface ClassWithDescriptor<T extends GenieObject> {
   ClassDescriptor: ClassDescriptor<T>
 }
 
+export type LazyType<T> = T;
+
 export function GenieClass(comment: string) {
     return function (target: any) {
         genieCalledBeforeInit = true;

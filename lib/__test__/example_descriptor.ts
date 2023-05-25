@@ -1,130 +1,9 @@
 import {ClassDescriptor, FieldDescriptor, FuncDescriptor, GenieObject, ParamDescriptor} from "../dsl-descriptor";
 import {ExampleParse} from "../nl/prompt-gen";
-import {float, GenieClass, GenieFunction, GenieKey, GenieProperty, int} from "../decorators";
+import {float, GenieClass, GenieFunction, GenieKey, GenieProperty, int, LazyType} from "../decorators";
 
 export let recentBooking = null;
 
-@GenieClass("A food item")
-export class Food extends GenieObject {
-  @GenieFunction("Get all food items")
-  static _all: Food[] = [];
-  static all(): Food[] {
-    return Food._all;
-  };
-
-  @GenieKey
-  @GenieProperty("Name of the food item")
-  public name: string;
-  @GenieProperty("Price of the food item")
-  public price: float;
-  @GenieProperty("Restaurant of the food item")
-  public restaurant: Restaurant;
-
-  constructor({name, price, restaurant} : {name: string, price: float, restaurant: Restaurant}) {
-    super({name: name});
-    this.name = name;
-    this.price = price;
-    this.restaurant = restaurant;
-    Food._all.push(this);
-  }
-
-  description(): {} {
-    return {
-      name: this.name,
-      price: this.price,
-      restaurant: this.restaurant.name
-    };
-  }
-
-  static _ClassDescriptor = new ClassDescriptor<Food>(
-    "Food",
-    [
-        new FuncDescriptor("all", [], "Food[]", true, "All foods")
-    ],
-    [
-      new FieldDescriptor("name", "string", false),
-      new FieldDescriptor("price", "float", false),
-      new FieldDescriptor("restaurant", "Restaurant", false, "The restaurant this food is served at")
-    ],
-    Food
-  );
-}
-
-
-@GenieClass("An Order")
-export class Order extends GenieObject {
-  static _all: Order[] = [];
-  @GenieFunction("Get all orders")
-  static all(): Order[] {
-    return Order._all;
-  }
-
-  static _current: Order = undefined;
-
-  @GenieFunction("Get the current order")
-  static current(): Order {
-    if (this._current === undefined) {
-      this._current = new Order(DateTime.fromDate(new Date()), [], null);
-    }
-    return this._current;
-  }
-
-  @GenieKey
-  @GenieProperty("Time that order is placed")
-  public dateTime: DateTime;
-  @GenieProperty("Foods in the order")
-  public foods: Food[];
-  @GenieProperty("Restaurant of the order")
-  public restaurant: Restaurant;
-
-  constructor({dateTime, foods, restaurant} : {dateTime: DateTime, foods: Food[], restaurant: Restaurant}) {
-    super({dateTime: dateTime});
-    this.dateTime = dateTime;
-    this.foods = foods;
-    this.restaurant = restaurant;
-    Order._all.push(this);
-  }
-
-  @GenieFunction("Add foods to the order")
-  addFoods({foods}: {foods: Food[]}) {
-    this.foods.push(...foods);
-  }
-
-  @GenieFunction("Remove foods from the order")
-  removeFoods({foods}: {foods: Food[]}) {
-    this.foods = this.foods.filter(f => !foods.includes(f));
-  }
-
-  @GenieFunction("Place the order")
-  placeOrder() {
-    this.restaurant.orders.push(this);
-  }
-
-  description(): {} {
-    return {
-      dateTime: this.dateTime.toString(),
-      foods: this.foods.map(f => f.name),
-      restaurant: this.restaurant.name
-    };
-  }
-
-  static _ClassDescriptor = new ClassDescriptor<Order>(
-    "Order",
-    [
-      new FuncDescriptor("addFoods", [new ParamDescriptor("foods", "Food[]")], "void", false, "Add a list of foods to the order"),
-      new FuncDescriptor("removeFoods", [new ParamDescriptor("foods", "Food[]")], "void", false, "Remove a list of foods from the order"),
-      new FuncDescriptor("placeOrder", [], "void", false, "Place the order"),
-      new FuncDescriptor("current", [], "Order", true, "The current order"),
-      new FuncDescriptor("all", [], "Order[]", true, "All past orders")
-    ],
-    [
-      new FieldDescriptor("dateTime", "DateTime", false),
-      new FieldDescriptor("foods", "Food[]", false),
-      new FieldDescriptor("restaurant", "Restaurant", false)
-    ],
-    Order
-  );
-}
 
 export class DateTime extends GenieObject {
   private date;
@@ -278,6 +157,130 @@ export class DateTime extends GenieObject {
   );
 }
 
+@GenieClass("A food item")
+export class Food extends GenieObject {
+  static _all: Food[] = [];
+
+  @GenieFunction("Get all food items")
+  static all(): Food[] {
+    return Food._all;
+  };
+
+  @GenieKey
+  @GenieProperty("Name of the food item")
+  public name: string;
+  @GenieProperty("Price of the food item")
+  public price: float;
+  @GenieProperty("Restaurant of the food item")
+  public restaurant: LazyType<Restaurant>;
+
+  constructor({name, price, restaurant} : {name: string, price: float, restaurant: LazyType<Restaurant>}) {
+    super({name: name});
+    this.name = name;
+    this.price = price;
+    this.restaurant = restaurant;
+    Food._all.push(this);
+  }
+
+  description(): {} {
+    return {
+      name: this.name,
+      price: this.price,
+      restaurant: this.restaurant.name
+    };
+  }
+
+  static _ClassDescriptor = new ClassDescriptor<Food>(
+    "Food",
+    [
+        new FuncDescriptor("all", [], "Food[]", true, "All foods")
+    ],
+    [
+      new FieldDescriptor("name", "string", false),
+      new FieldDescriptor("price", "float", false),
+      new FieldDescriptor("restaurant", "Restaurant", false, "The restaurant this food is served at")
+    ],
+    Food
+  );
+}
+
+
+@GenieClass("An Order")
+export class Order extends GenieObject {
+  static _all: Order[] = [];
+  @GenieFunction("Get all orders")
+  static all(): Order[] {
+    return Order._all;
+  }
+
+  static _current: Order = undefined;
+
+  @GenieFunction("Get the current order")
+  static current(): Order {
+    if (this._current === undefined) {
+      this._current = new Order(DateTime.fromDate(new Date()), [], null);
+    }
+    return this._current;
+  }
+
+  @GenieKey
+  @GenieProperty("Time that order is placed")
+  public dateTime: DateTime;
+  @GenieProperty("Foods in the order")
+  public foods: Food[];
+  @GenieProperty("Restaurant of the order")
+  public restaurant: Restaurant;
+
+  constructor({dateTime, foods, restaurant} : {dateTime: DateTime, foods: Food[], restaurant: Restaurant}) {
+    super({dateTime: dateTime});
+    this.dateTime = dateTime;
+    this.foods = foods;
+    this.restaurant = restaurant;
+    Order._all.push(this);
+  }
+
+  @GenieFunction("Add foods to the order")
+  addFoods({foods}: {foods: Food[]}): void {
+    this.foods.push(...foods);
+  }
+
+  @GenieFunction("Remove foods from the order")
+  removeFoods({foods}: {foods: Food[]}): void {
+    this.foods = this.foods.filter(f => !foods.includes(f));
+  }
+
+  @GenieFunction("Place the order")
+  placeOrder(): void {
+    this.restaurant.orders.push(this);
+  }
+
+  description(): {} {
+    return {
+      dateTime: this.dateTime.toString(),
+      foods: this.foods.map(f => f.name),
+      restaurant: this.restaurant.name
+    };
+  }
+
+  static _ClassDescriptor = new ClassDescriptor<Order>(
+    "Order",
+    [
+      new FuncDescriptor("addFoods", [new ParamDescriptor("foods", "Food[]")], "void", false, "Add a list of foods to the order"),
+      new FuncDescriptor("removeFoods", [new ParamDescriptor("foods", "Food[]")], "void", false, "Remove a list of foods from the order"),
+      new FuncDescriptor("placeOrder", [], "void", false, "Place the order"),
+      new FuncDescriptor("current", [], "Order", true, "The current order"),
+      new FuncDescriptor("all", [], "Order[]", true, "All past orders")
+    ],
+    [
+      new FieldDescriptor("dateTime", "DateTime", false),
+      new FieldDescriptor("foods", "Food[]", false),
+      new FieldDescriptor("restaurant", "Restaurant", false)
+    ],
+    Order
+  );
+}
+
+
 @GenieClass("A restaurant")
 export class Restaurant extends GenieObject {
   static _all: Restaurant[] = undefined
@@ -346,13 +349,13 @@ export class Restaurant extends GenieObject {
   }
 
   createFood(name: string, price: float) {
-    const food = new Food(name, price, this)
+    const food: Food = Food.CreateObject(name, price, this)
     this.menu.push(food);
     return food
   }
 
   createOrder(dateTime: DateTime, foods: Food[]) {
-    const order = new Order(dateTime, foods, this);
+    const order = Order.CreateObject(dateTime, foods, this);
     this.orders.push(order);
     return order;
   }
