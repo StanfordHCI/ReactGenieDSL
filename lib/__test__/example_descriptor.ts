@@ -69,8 +69,19 @@ export class Order extends GenieObject {
     return this._current;
   }
 
-  constructor(public dateTime: DateTime, public foods: Food[], public restaurant: Restaurant | null) {
+  @GenieKey
+  @GenieProperty("Time that order is placed")
+  public dateTime: DateTime;
+  @GenieProperty("Foods in the order")
+  public foods: Food[];
+  @GenieProperty("Restaurant of the order")
+  public restaurant: Restaurant;
+
+  constructor({dateTime, foods, restaurant} : {dateTime: DateTime, foods: Food[], restaurant: Restaurant}) {
     super({dateTime: dateTime});
+    this.dateTime = dateTime;
+    this.foods = foods;
+    this.restaurant = restaurant;
     Order._all.push(this);
   }
 
