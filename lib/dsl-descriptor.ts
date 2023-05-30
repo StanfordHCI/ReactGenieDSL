@@ -1,12 +1,15 @@
 export class GenieObject {
   private readonly _initParams: any;
+  static genieKey: string;
+
   constructor(initParams: any) {
     this._initParams = initParams;
   }
 
   // noinspection JSUnusedGlobalSymbols
   _getConstructorParams(): any {
-    return this._initParams;
+    const name = this.constructor.prototype.genieKey;
+    return {name: this[name]}
   }
 
   // placeholder, should be replaced by GenieClass decorator

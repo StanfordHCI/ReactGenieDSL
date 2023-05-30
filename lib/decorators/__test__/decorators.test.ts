@@ -1,11 +1,11 @@
 import "../decorators";
 import * as assert from "assert";
 import {ClassDescriptor, FieldDescriptor, FuncDescriptor, GenieObject} from "../../dsl-descriptor";
-import {setSharedStore} from "../store";
-import {createStore} from "redux";
 import {initGenie} from "../decorators";
-import {DateTime} from "../../__test__/example_descriptor";
+import {DateTime, Food, Order, Restaurant} from "../../__test__/example_descriptor";
 
+
+initGenie();
 
 function essentialFuncDescriptor(original: FuncDescriptor) {
     return {
@@ -26,16 +26,22 @@ function essentialFieldDescriptor(original: FieldDescriptor) {
     }
 }
 
+function sortDescriptor(a: {name: string}, b: {name: string}) {
+    return a.name.localeCompare(b.name);
+}
+
+
 function compareClassDescriptor(a: ClassDescriptor<GenieObject>, b: ClassDescriptor<GenieObject>) {
     assert.equal(a.className, b.className);
     assert.equal(a.classConstructor, b.classConstructor);
     assert.equal(a.functions.size, b.functions.size);
     assert.equal(a.fields.size, b.fields.size);
-    expect(Array.from(a.functions).map(essentialFuncDescriptor).sort()).toEqual(Array.from(b.functions).map(essentialFuncDescriptor).sort());
+    expect(Array.from(a.functions).map(essentialFuncDescriptor).sort(sortDescriptor)).
+    toEqual(Array.from(b.functions).map(essentialFuncDescriptor).sort(sortDescriptor));
+    expect(Array.from(a.fields).map(essentialFieldDescriptor).sort(sortDescriptor)).
+    toEqual(Array.from(b.fields).map(essentialFieldDescriptor).sort(sortDescriptor));
 }
 test("Restaurant Descriptor", async () => {
-    initGenie();
-    const { Restaurant } = await import("../../__test__/example_descriptor");
     compareClassDescriptor(Restaurant.ClassDescriptor, Restaurant._ClassDescriptor);
     Restaurant.all();
     const restaurant1 = Restaurant.GetObject({name: "McDonald's"});
@@ -47,8 +53,6 @@ test("Restaurant Descriptor", async () => {
 });
 
 test("Food Descriptor", async () => {
-    initGenie();
-    const { Food } = await import("../../__test__/example_descriptor");
     compareClassDescriptor(Food.ClassDescriptor, Food._ClassDescriptor);
     Food.all();
     const foodItem1 = Food.GetObject({
@@ -64,8 +68,6 @@ test("Food Descriptor", async () => {
 });
 
 test("Order Descriptor", async () => {
-    initGenie();
-    const { Order, DateTime } = await import("../../__test__/example_descriptor");
     compareClassDescriptor(Order.ClassDescriptor, Order._ClassDescriptor);
     Order.all();
     const order1 = Order.GetObject({dateTime: new DateTime({ year: 2020, month: 1, day: 1, hour: 13, minute: 0 })});

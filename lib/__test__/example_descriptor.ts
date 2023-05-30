@@ -6,7 +6,7 @@ export let recentBooking = null;
 
 
 export class DateTime extends GenieObject {
-  private date;
+  private date: Date;
 
   public year: number;
   public month: number;
@@ -218,7 +218,7 @@ export class Order extends GenieObject {
   @GenieFunction("Get the current order")
   static current(): Order {
     if (this._current === undefined) {
-      this._current = new Order(DateTime.fromDate(new Date()), [], null);
+      this._current = Order.CreateObject({dateTime: DateTime.fromDate(new Date()), foods: [], restaurant: null});
     }
     return this._current;
   }
@@ -229,9 +229,9 @@ export class Order extends GenieObject {
   @GenieProperty("Foods in the order")
   public foods: Food[];
   @GenieProperty("Restaurant of the order")
-  public restaurant: Restaurant;
+  public restaurant: LazyType<Restaurant>;
 
-  constructor({dateTime, foods, restaurant} : {dateTime: DateTime, foods: Food[], restaurant: Restaurant}) {
+  constructor({dateTime, foods, restaurant} : {dateTime: DateTime, foods: Food[], restaurant: LazyType<Restaurant> | null}) {
     super({dateTime: dateTime});
     this.dateTime = dateTime;
     this.foods = foods;
@@ -321,7 +321,7 @@ export class Restaurant extends GenieObject {
       kfc.createFood("Fries", 2);
       kfc.createFood("Pepsi Coke", 2);
       kfc.createOrder(
-        new DateTime({ year: 2020, month: 1, day: 1, hour: 12, minute: 0 }),
+        new DateTime({ year: 2020, month: 1, day: 1, hour: 15, minute: 0 }),
         [kfc.menu[0], kfc.menu[1]]
       )
 
@@ -349,13 +349,13 @@ export class Restaurant extends GenieObject {
   }
 
   createFood(name: string, price: float) {
-    const food: Food = Food.CreateObject(name, price, this)
+    const food: Food = Food.CreateObject({name, price, restaurant: this})
     this.menu.push(food);
     return food
   }
 
   createOrder(dateTime: DateTime, foods: Food[]) {
-    const order = Order.CreateObject(dateTime, foods, this);
+    const order = Order.CreateObject({dateTime, foods, restaurant: this});
     this.orders.push(order);
     return order;
   }
@@ -407,7 +407,7 @@ export class Restaurant extends GenieObject {
         new FieldDescriptor("name", "string", false),
         new FieldDescriptor("menu", "Food[]", false),
         new FieldDescriptor("rating", "int", false),
-        new FieldDescriptor("priceGrade", "int", false),
+        new FieldDescriptor("priceGrade", "float", false),
         new FieldDescriptor("cuisine", "string", false),
         new FieldDescriptor("address", "string", false),
         new FieldDescriptor("orders", "Order[]", false),

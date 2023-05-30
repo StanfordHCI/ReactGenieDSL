@@ -6,7 +6,7 @@ test("Restaurant Description", async () => {
       "\tstring name;\n" +
       "\tFood[] menu;\n" +
       "\tint rating;\n" +
-      "\tint priceGrade;\n" +
+      "\tfloat priceGrade;\n" +
       "\tstring cuisine;\n" +
       "\tstring address;\n" +
       "\tOrder[] orders;\n" +

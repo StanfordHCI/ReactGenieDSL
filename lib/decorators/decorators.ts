@@ -88,16 +88,16 @@ export function GenieClass(comment: string) {
             }
             // check if keyField exists
             if (!obj[keyField]) {
-                throw new Error("keyField " + keyField + " not found in object " + obj);
+                throw new Error("keyField " + keyField + " not found in object " + obj.constructor.name + "\n" + "Did you have @GenieKey on the key field?");
             }
             // save data to store
             genieDispatch(() => {
                 if (!sharedState[target.name]) {
                     sharedState[target.name] = {};
                 }
-                if (sharedState[target.name][obj[keyField]]) {
-                    throw new Error("object with key " + obj[keyField] + " already exists in store");
-                }
+                // if (sharedState[target.name][obj[keyField]]) {
+                //     throw new Error("object with key " + obj[keyField] + " already exists in store");
+                // }
                 sharedState[target.name][obj[keyField]] = {};
                 // save all fields
                 allFields.forEach((field) => {
