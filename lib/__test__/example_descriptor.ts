@@ -218,12 +218,14 @@ export class Order extends GenieObject {
   @GenieFunction("Get the current order")
   static current(): Order {
     if (this._current === undefined) {
-      this._current = Order.CreateObject({dateTime: DateTime.fromDate(new Date()), foods: [], restaurant: null});
+      this._current = Order.CreateObject({orderId: (Order.all().length+1).toString()});
     }
     return this._current;
   }
 
   @GenieKey
+  @GenieProperty("Order ID number")
+  public orderId: string;
   @GenieProperty("Time that order is placed")
   public dateTime: DateTime;
   @GenieProperty("Foods in the order")
@@ -232,7 +234,8 @@ export class Order extends GenieObject {
   public restaurant: LazyType<Restaurant>;
 
   constructor({dateTime, foods, restaurant} : {dateTime: DateTime, foods: Food[], restaurant: LazyType<Restaurant> | null}) {
-    super({dateTime: dateTime});
+    super({orderId: orderId});
+    this.orderId = (Order.all().length+1).toString();
     this.dateTime = dateTime;
     this.foods = foods;
     this.restaurant = restaurant;
@@ -272,9 +275,10 @@ export class Order extends GenieObject {
       new FuncDescriptor("all", [], "Order[]", true, "All past orders")
     ],
     [
-      new FieldDescriptor("dateTime", "DateTime", false),
-      new FieldDescriptor("foods", "Food[]", false),
-      new FieldDescriptor("restaurant", "Restaurant", false)
+        new FieldDescriptor("orderId", "string", false),
+        new FieldDescriptor("dateTime", "DateTime", false),
+        new FieldDescriptor("foods", "Food[]", false),
+        new FieldDescriptor("restaurant", "Restaurant", false)
     ],
     Order
   );
@@ -305,14 +309,17 @@ export class Restaurant extends GenieObject {
       mcDonald.createFood("McDouble", 4);
       mcDonald.createFood("Coca Cola Coke", 2);
       mcDonald.createOrder(
+          (Order.all().length+1).toString(),
         new DateTime({ year: 2020, month: 1, day: 1, hour: 12, minute: 0 }),
         [mcDonald.menu[0], mcDonald.menu[1]]
       );
       mcDonald.createOrder(
+          (Order.all().length+1).toString(),
         new DateTime({ year: 2020, month: 1, day: 1, hour: 13, minute: 0 }),
         [mcDonald.menu[2], mcDonald.menu[3]]
       );
       mcDonald.createOrder(
+          (Order.all().length+1).toString(),
         new DateTime({ year: 2020, month: 2, day: 1, hour: 14, minute: 0 }),
         [mcDonald.menu[4], mcDonald.menu[5]]
       );
@@ -321,6 +328,7 @@ export class Restaurant extends GenieObject {
       kfc.createFood("Fries", 2);
       kfc.createFood("Pepsi Coke", 2);
       kfc.createOrder(
+          (Order.all().length+1).toString(),
         new DateTime({ year: 2020, month: 1, day: 1, hour: 15, minute: 0 }),
         [kfc.menu[0], kfc.menu[1]]
       )
@@ -354,8 +362,8 @@ export class Restaurant extends GenieObject {
     return food
   }
 
-  createOrder(dateTime: DateTime, foods: Food[]) {
-    const order = Order.CreateObject({dateTime, foods, restaurant: this});
+  createOrder(orderId: string, dateTime: DateTime, foods: Food[]) {
+    const order = Order.CreateObject({orderId, dateTime, foods, restaurant: this});
     this.orders.push(order);
     return order;
   }
