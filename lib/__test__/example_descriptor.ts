@@ -233,7 +233,7 @@ export class Order extends GenieObject {
   @GenieProperty("Restaurant of the order")
   public restaurant: LazyType<Restaurant>;
 
-  constructor({dateTime, foods, restaurant} : {dateTime: DateTime, foods: Food[], restaurant: LazyType<Restaurant> | null}) {
+  constructor({orderId, dateTime, foods, restaurant} : {orderId: string, dateTime: DateTime, foods: Food[], restaurant: LazyType<Restaurant> | null}) {
     super({orderId: orderId});
     this.orderId = (Order.all().length+1).toString();
     this.dateTime = dateTime;
