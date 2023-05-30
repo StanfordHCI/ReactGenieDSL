@@ -1,12 +1,12 @@
 import {Restaurant} from './example_descriptor'
 
 test("Restaurant Description", async () => {
-  const description = Restaurant.ClassDescriptor.description();
+  const description = Restaurant._ClassDescriptor.description();
   expect(description).toEqual("class Restaurant {\n" +
       "\tstring name;\n" +
       "\tFood[] menu;\n" +
       "\tint rating;\n" +
-      "\tint priceGrade;\n" +
+      "\tfloat priceGrade;\n" +
       "\tstring cuisine;\n" +
       "\tstring address;\n" +
       "\tOrder[] orders;\n" +

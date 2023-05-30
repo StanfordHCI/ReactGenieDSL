@@ -7,7 +7,6 @@ before run:
 
 ```bash
 npm ci
-peggy lib/dsl/parser.pegjs -o lib/dsl/parser.gen.js
 ```
 
 test:
