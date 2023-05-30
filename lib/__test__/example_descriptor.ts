@@ -218,7 +218,7 @@ export class Order extends GenieObject {
   @GenieFunction("Get the current order")
   static current(): Order {
     if (this._current === undefined) {
-      this._current = Order.CreateObject({orderId: (Order.all().length+1).toString()});
+      this._current = Order.CreateObject({orderId: (Order.all().length+1).toString(), dateTime: DateTime.fromDate(new Date()), foods: [], restaurant: Restaurant.current()});
     }
     return this._current;
   }
@@ -426,9 +426,9 @@ export class Restaurant extends GenieObject {
 
 
 export const allDescriptors = [
-  Restaurant._ClassDescriptor,
-  Food._ClassDescriptor,
-  Order._ClassDescriptor,
+  Restaurant.ClassDescriptor,
+  Food.ClassDescriptor,
+  Order.ClassDescriptor,
   DateTime._ClassDescriptor
 ]
 

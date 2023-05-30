@@ -71,10 +71,10 @@ test("Order Descriptor", async () => {
     compareClassDescriptor(Order.ClassDescriptor, Order._ClassDescriptor);
     Order.all();
     const order1 = Order.GetObject({orderId: 1});
-    const order2 = Order.GetObject({orderId: 2});
-    order2.dateTime = new DateTime({ year: 2023, month: 1, day: 1, hour: 13, minute: 0 }),
-        assert.equal(order1.dateTime, new DateTime({ year: 2023, month: 1, day: 1, hour: 13, minute: 0 }));
-    order2.dateTime = new DateTime({ year: 2023, month: 1, day: 2, hour: 13, minute: 0 }),
-        assert.equal(order1.dateTime, new DateTime({ year: 2023, month: 1, day: 2, hour: 13, minute: 0 }));
+    const order2 = Order.GetObject({orderId: 1});
+    order2.dateTime = new DateTime({ year: 2023, month: 1, day: 1, hour: 13, minute: 0 });
+    assert.equal(order1.dateTime.toString(), new DateTime({ year: 2023, month: 1, day: 1, hour: 13, minute: 0 }).toString());
+    order2.dateTime = new DateTime({ year: 2023, month: 1, day: 2, hour: 13, minute: 0 });
+    assert.equal(order1.dateTime.toString(), new DateTime({ year: 2023, month: 1, day: 2, hour: 13, minute: 0 }).toString());
 });
 

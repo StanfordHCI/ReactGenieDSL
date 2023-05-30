@@ -23,9 +23,9 @@ test('Parser complex voice', async () => {
         new BasicPromptGen(
             classDescriptions,
             examples,
-            "// we are using voice recognition. so there may be errors. Try to think about words with similar sounds. For example \"elder\" can actually be \"order\"."),
+            "// We utilize voice recognition technology, which may occasionally result in errors. Please consider the possibility of words with similar sounds being misinterpreted. For instance, the word \"order\" might be mistakenly recognized as \"elder\"."),
         process.env.api_key
     );
-    const parsed = await parser.parse("elder the same foods that I elder at mcDonald last time");
+    const parsed = await parser.parseGpt4("elder the same foods that I ordered at mcDonald last time");
     return expect(parsed).toBe("Order.current().addFoods(foods: Order.all().matching(field: .restaurant, value: Restaurant.all().matching(field: .name, value: \"mcDonald\")[0]).sort(field: .dateTime, ascending: false)[0].foods)");
 });

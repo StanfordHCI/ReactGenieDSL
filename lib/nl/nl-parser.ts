@@ -21,9 +21,34 @@ export class NlParser {
       top_p: 1,
       frequency_penalty: 0,
       presence_penalty: 0,
-      stop: ["\n", "user:"],
+      stop: ["\n"],
     });
     return await (response).data.choices[0]?.text.trim();
+  }
+
+  async parseGpt4(nl: string): Promise<string | null> {
+    const prompt = this.prompt.prompt(nl);
+    const response = await this.openAiApi.createChatCompletion({
+      model: "gpt-4",
+      temperature: 0,
+      top_p: 1,
+      n: 1,
+      stream: false,
+      max_tokens: 256,
+      presence_penalty: 0,
+      frequency_penalty: 0,
+      messages: [
+        {
+          role: "system",
+          content: "only generate one line of code",
+        },
+        {
+          role: "user",
+          content: prompt,
+        }
+      ]
+    })
+    return await (response).data.choices[0]?.message.content.trim();
   }
 
   async respond(nl: string, parsed: string, result: string): Promise<string | null> {
