@@ -1,7 +1,7 @@
 # ReactGenie File Browser CLI
 
-The ReactGenie File Browser is a command-line interface application that utilizes the power of OpenAI's GPT-3.5 model through the `reactgenie-dsl` package. This application
-allows users to navigate and interact with their local file system using natural language commands.
+The ReactGenie File Browser is a command-line interface application that utilizes the `reactgenie-dsl` package to
+allow users to navigate and interact with their local file system using natural language commands.
 
 ## Prerequisites
 
