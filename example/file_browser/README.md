@@ -32,7 +32,7 @@ Before getting started, make sure you have the following requirements in place:
       }
     ```
 
-2. Run the following command in your terminal to install the package along with its dependencies:
+3. Run the following command in your terminal to install the package along with its dependencies:
 
     ```bash
     npm install
