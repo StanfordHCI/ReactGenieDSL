@@ -22,7 +22,7 @@
     "typescript": "^5.0.4"
   },
   "scripts": {
-    "prepare": "",
-    "start": "ts-node --transpile-only -r @babel/register src/main.ts"
+    "prepare": "npx babel src --out-dir dist --extensions '.ts'",
+    "start": "node dist/main.js"
   }
 }
