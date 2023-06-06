@@ -47,7 +47,7 @@ required, providing improved performance and flexibility in generating React com
 The all() function needs to be destructured to access the Food._all array, which is a static property of the Food class.
 As a result, it needs to be referenced through the Food class itself.
 
-```bash
+```typescript
 @GenieClass("A food item")
 export class Food extends GenieObject {
   static _all: Food[] = [];
