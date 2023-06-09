@@ -1,15 +1,25 @@
-ReactGenieDSL: language parser and interpreter for ReactGenie
+ReactGenieDSL: A language parser and interpreter for ReactGenie
 =========================================================
 Jackie Yang (jackie@jackieyang.me)
 ----------------------------------
 
 ReactGenieDSL is a Javascript library that extends ReactGenie, a multimodal React framework, to support error handling 
-with the help of a natural language parser. ReactGenieDSL is written in Typescript.
+with the help of a natural language parser. If you are creating a voice or text-based React application, ReactGenieDSL
+can help you with state management, parsing the user's voice input, and executing user voice commands.  
 
-## Install
+ReactGenieDSL is written in Typescript. It provides a specialized syntax and 
+set of features tailored to assist with ReactGenie. 
 
-before run:
+## Prerequisites
 
+Before getting started, make sure you have the following requirements in place:
+
+- Node Version Manager (NVM) version 18 or higher.
+- Babel installed with a `babel.config.js` file for special transpiling needs.
+- Access to OpenAI API Key
+
+## Installation
+Install dependencies:
 ```bash
 npm ci
 
@@ -17,25 +27,44 @@ npm ci
 
 npm install
 ```
+Please ensure that the `babel.config.js` file is present in the root directory of your project. This file is required
+to configure Babel with the appropriate transpiler plugin for ReactGenieDSL. Make sure to include ReactGenieDSL as a
+dependency in your `package.json` file, as well.
 
-## Testing
+
+## Running ReactGenie DSL
+This command sets an environment variable api_key to your Open AI API key. This step is necessary because ReactGenieDSL 
+relies on Open AI for generating error messages.
+
+By executing `npx jest`, you trigger the test runner to execute tests that verify state management. The test results 
+will be displayed in the terminal, indicating whether the tests passed or failed.
 
 ```bash
 export api_key=sk-***** # your api key here
 npx jest
 ```
 
-## Creating Class Objects
-ReactGenie objects are created by extending the `GenieObject` class. A ReactGenie object has the following descriptors,
+## Creating Genie Class Objects
+ReactGenie objects are created by extending the `GenieObject` class. These objects are used to define states in your app
+for state management. A ReactGenie object has the following descriptors,
 which must be used to annotate the class. This will tell the natural language parser how to interpret the class.
 - `GenieClass`: Assigned to the class. 
 - `GenieFunction`: Assigned to static functions.
 - `GenieKey`: Assigned to the primary key of the class. This is how the class object is identified in the shared state database.
 - `GenieProperty`: Assigned to fields of the class.
-You must also include a static `_ClassDescriptor` field in the class, which is used to store an example of the different
-class descriptors to use for testing purposes. 
 
-```bash
+The all() function gets all objects of that class from the shared state database. This must be destructured into a static
+field called `_all` in the class to be used by the natural language parser.
+
+You must use LazyTypes when referencing other ReactGenie objects that have not been created yet in that instance. For 
+example, in the Food class below, the restaurant field is a LazyType of the Restaurant class because Restaurant is initiated 
+after the Food class.
+
+
+The all() function needs to be destructured to access the Food._all array, which is a static property of the Food class.
+As a result, it needs to be referenced through the Food class itself.
+
+```typescript
 @GenieClass("A food item")
 export class Food extends GenieObject {
   static _all: Food[] = [];
@@ -68,38 +97,20 @@ export class Food extends GenieObject {
       restaurant: this.restaurant.name
     };
   }
-
-  static _ClassDescriptor = new ClassDescriptor<Food>(
-    "Food",
-    [
-        new FuncDescriptor("all", [], "Food[]", true, "All foods")
-    ],
-    [
-      new FieldDescriptor("name", "string", false),
-      new FieldDescriptor("price", "float", false),
-      new FieldDescriptor("restaurant", "Restaurant", false, "The restaurant this food is served at")
-    ],
-    Food
-  );
 }
 ```
 
-## Writing Tests 
-State Management: Tests are written in the `decorators.test.ts` file in the `__tests__` folder. See the following 
-example to test whether state management works for the ReactGenie class objects.
-`compareClassDescriptor` is used to compare the class descriptors that Genie identifies and the static `_ClassDescriptor` 
-that is predefined in the class object.
+By annotating our class with these Genie descriptors, ReactGenieDSL will be able to parse the user's input utterance and 
+automatically generate a command that can be executed by the app. For example, if the user says "What is the price of a 
+burger?", the parser will generate the following command: `Food.current().getPrice()`.
 
-```bash
-test("Food Descriptor", async () => {
-    compareClassDescriptor(Food.ClassDescriptor, Food._ClassDescriptor);
-    Food.all();
-    const foodItem1 = Food.GetObject({name: "Hamburger"});
-    const foodItem2 = Food.GetObject({name: "Hamburger"});
-    foodItem2.price = 6.99;
-    assert.equal(foodItem1.price, 6.99);
-    foodItem2.price = 5.99;
-    assert.equal(foodItem1.price, 5.99);
-});
-```
+Here some more examples of complex commands that can be generated by the parser:
+- User utterance: "I want to order a burger"
+  - Parsed Result: `Order.GetActiveCart().addItems(items: [OrderItem.CreateOrderItem(FoodItem.GetFoodItem(name: \"burger\"))])`
+- User utterance: What is the delivery fee of McDonalds?
+  - Parsed Result: `Restaurant.GetRestaurant(name: "mcdonalds").deliveryFee`
 
+
+## Contributing
+Contributions to ReactGenieDSL are welcome! If you encounter any issues or have suggestions for improvements, please 
+create a new issue on the repository. Pull requests are also appreciated.
