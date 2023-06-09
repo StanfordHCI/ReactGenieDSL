@@ -1,6 +1,6 @@
 ReactGenieDSL: A language parser and interpreter for ReactGenie
 =========================================================
-Jackie Yang (jackie@jackieyang.me)
+ReactGenie Team
 ----------------------------------
 
 ReactGenieDSL is a Javascript library that extends ReactGenie, a multimodal React library, to support complex interactions
