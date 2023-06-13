@@ -10,53 +10,57 @@ Before getting started, make sure you have the following requirements in place:
 - Node.js version 18 or higher, preferably installed through Node Version manager (NVM).
 - Access to OpenAI API Key
 
-## Installation
+## Running the Demo
 
-1. Add the `reactgenie-dsl` package to your `package.json` file as a dependency:
+Run the following command in your terminal to install the package along with its dependencies:
 
-    ```json
-    {
-      "dependencies": {
-        "reactgenie-dsl": "../../"
-      }
-    }
-    ```
-
-2. Add the following scripts to your `package.json` file:
-
-    ```json
-    "scripts": {
-      "prepare": "npx babel src --out-dir dist --extensions '.ts'",
-      "start": "node dist/main.js"
-      }
-    ```
-
-3. Run the following command in your terminal to install the package along with its dependencies:
-
-   ```
-   bash
+   ```bash
    npm install
    ```
 
-## Running the Demo
+Export your OpenAI API key into your session environment variables:
+
+  ```bash
+  export api_key=sk-***** # your api key here
+  ```
+
 To run this demo, prepare the application by running the following command in the terminal:
 
-    bash
-    npm run prepare
-
+   ```bash
+   npm run prepare
+   ```
 
 This will use Babel to transpile ReactGenie due to the decorators it uses.
 
 To start the application, run the following command:
 
-    bash
-    npm run start
+   ```bash
+   npm run start
+   ```
+
+When running `npm run start`, if you receive the following error:
+
+   ```bash
+node:internal/modules/cjs/loader:798
+      throw new ERR_UNKNOWN_BUILTIN_MODULE(request);
+      ^
+
+Error [ERR_UNKNOWN_BUILTIN_MODULE]: No such built-in module: node:readline/promises
+   ```
+
+It is likely that you're not using Node.js version 18 or higher. You can install and use the correct version by running the following commands:
+
+   ```bash
+nvm install 18
+nvm use 18
+nvm alias default 18 // if you want to use this version by default
+   ```
 
 The CLI should now be running in your terminal.
 
 ## Usage
 
-Once setup is complete, you can run the CLI application which will ask you for commands, interpret them, and return the results. This application continues to handle user inputs in a loop until manually stopped.
+Once setup is complete, you can run the CLI application and navigate your file browser through natural language commands! This application continues to handle user inputs in a loop until manually stopped.
 
 Example usage:
 
@@ -65,22 +69,20 @@ Current path: /Users/user/Documents
 Enter command: what is the first directory?
 ```
 
-## Creating Applications with ReactGenie
+## How the Demo is Structured with ReactGenie
 
-ReactGenie allows for the creation of highly interactive applications that respond to natural language commands, offering a unique way for users to interact with your application.
-In the following steps, we will guide developers on how to use ReactGenie to build functional multimodal applications, using the file browser CLI as an example.
+ReactGenie allows for the creation of highly interactive multimodal applications that respond to natural language commands, offering a unique way for users to interact with your application.
+In the following steps, we will walk developers through the structure of using ReactGenie in an application, using the file browser CLI as an example.
 
-In your src directory, ensure the following files are present:
+In the src directory, you will find the following files:
 
 - **package.json:** Lists metadata and dependencies that are installed using `npm install`.
 
-- **package-lock.json:** An automatically generated file that tracks exact versions of installed dependencies, ensuring consistency across different development environments.
-
-- **tsconfig.json:** The configuration file for the TypeScript compiler, dictating how TypeScript code should be compiled into JavaScript, controlling version compatibility and additional language features.
+- **tsconfig.json:** The configuration file for the TypeScript compiler, dictating how TypeScript code should be compiled into JavaScript.
 
 - **babel.config.js:** The configuration file for Babel, a JavaScript compiler crucial for ReactGenie due to the decorators it uses. Decorators are not yet supported natively in all environments, so Babel is used to transpile them into Javascript understood by the environment.
 
-To use ReactGenie, follow these steps:
+ReactGenie is incorporated into the application through the following steps:
 
 1. **Organize your Genie files:** In your src directory, create a folder called `genie`. This is where you will put all your Genie classes. For instance, `GeniePath.ts` will be located here.
 
@@ -103,7 +105,7 @@ To use ReactGenie, follow these steps:
     }
     ```
 
-3. **Initialize:** Use the `setup` function to create the first object. This will establish the initial state/context for ReactGenie to work with. For example:
+3. **Initialize:** Before the program is run, `setup()` will be called first. If you want to initialize any object, do so here. For example:
 
     ```typescript
     public setup() {
@@ -135,11 +137,10 @@ To use ReactGenie, follow these steps:
         const funcCallResult = await interpreter.dslInterpreter.interpret(parsed);
    ```
 
-After the setup you can now interact with your application in a conversational manner!
+
 
 It is important to note that all Genie functions need to have a return type as ReactGenie does not perform type inferencing. Use the `int` and `float` types provided by ReactGenie instead of the number type where required.
 
-In terms of usage, for instance, if you're using the `GeniePath` class, you could run commands like "What's the current directory?", "List directory", "Change directory to the first one", or "What's in the project folder?".
 
 
 
