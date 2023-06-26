@@ -1,7 +1,24 @@
 import "reflect-metadata";
-import {ClassDescriptor, FieldDescriptor, FuncDescriptor, GenieObject, ParamDescriptor} from "../dsl-descriptor";
-import {createStore, Store} from "redux";
-import {genieDispatch, objects, originalClasses, setSharedStore, sharedState, sharedStore, storeReducer} from "./store";
+import {
+    ClassDescriptor,
+    FieldDescriptor,
+    FuncDescriptor,
+    DataClass,
+    ParamDescriptor,
+    HelperClass, HelperClassGetterSetter
+} from "../dsl-descriptor";
+import {Store} from "redux";
+import {configureStore} from "@reduxjs/toolkit";
+import {
+    genieDispatch,
+    objects,
+    originalClasses,
+    setSharedState,
+    setSharedStore,
+    sharedState,
+    sharedStore,
+    storeReducer
+} from "./store";
 
 export type int = number;
 export type float = number;
@@ -18,22 +35,22 @@ let geniePropertyModifier: GeniePropertyModifier = undefined;
 
 let genieInitialized = false;
 
-export function initGenie({genieClassModifier, genieFunctionModifier, geniePropertyModifier}: {
-    genieClassModifier?: GenieClassModifier,
-    genieFunctionModifier?: GenieFunctionModifier,
-    geniePropertyModifier?: GeniePropertyModifier
-} = {}) {
-    if (genieClassModifier) {
-        this.genieClassModifier = genieClassModifier;
+export function initGenie({initGenieClassModifier, initGenieFunctionModifier, initGeniePropertyModifier}: {
+    initGenieClassModifier?: GenieClassModifier,
+    initGenieFunctionModifier?: GenieFunctionModifier,
+    initGeniePropertyModifier?: GeniePropertyModifier
+} = {}) : Store {
+    if (initGenieClassModifier) {
+        genieClassModifier = initGenieClassModifier;
     }
-    if (genieFunctionModifier) {
-        this.genieFunctionModifier = genieFunctionModifier;
+    if (initGenieFunctionModifier) {
+        genieFunctionModifier = initGenieFunctionModifier;
     }
-    if (geniePropertyModifier) {
-        this.geniePropertyModifier = geniePropertyModifier;
+    if (initGeniePropertyModifier) {
+        geniePropertyModifier = initGeniePropertyModifier;
     }
-
-    setSharedStore(createStore(storeReducer));
+    let genieStore = configureStore({reducer: storeReducer});
+    setSharedStore(genieStore);
     // call modifiers for existing classes
     for (let className in AllGenieObjects) {
         const target = AllGenieObjects[className];
@@ -56,16 +73,122 @@ export function initGenie({genieClassModifier, genieFunctionModifier, geniePrope
     // call setup for existing classes
     for (let className in AllGenieObjects) {
         const target = AllGenieObjects[className];
-        target.prototype.setup();
+        target.setup();
     }
     genieInitialized = true;
+    return genieStore;
 }
 
-interface ClassWithDescriptor<T extends GenieObject> {
+interface ClassWithDescriptor<T extends DataClass> {
   ClassDescriptor: ClassDescriptor<T>
 }
 
 export type LazyType<T> = T;
+
+function getJsonByPath(json: any, path: (string | number)[]): any {
+    let current = json;
+    for (let pathElement of path) {
+        current = current[pathElement];
+    }
+    return current;
+}
+
+function setJsonByPath(json: any, path: (string | number)[] , value: any): any {
+    if (path.length === 0) {
+        return value;
+    } else {
+        return {
+            ...json,
+            [path[0]]: setJsonByPath(json[path[0]], path.slice(1), value)
+        }
+    }
+}
+
+class ObservableArray<T> extends Array<T> {
+  private callback: () => void;
+
+  constructor(callback: (array: ObservableArray<T>) => void, ...items: T[]) {
+    super(...items);
+    this.callback = () => callback(this);
+  }
+
+  push(...items: T[]): number {
+    const result = super.push(...items);
+    this.callback();
+    return result;
+  }
+
+  pop(): T {
+    const result = super.pop();
+    this.callback();
+    return result;
+  }
+
+  splice(start: number, deleteCount?: number, ...items: T[]): T[] {
+    const result = super.splice(start, deleteCount, ...items);
+    this.callback();
+    return result;
+  }
+
+  shift(): T {
+    const result = super.shift();
+    this.callback();
+    return result;
+  }
+
+  unshift(...items: T[]): number {
+    const result = super.unshift(...items);
+    this.callback();
+    return result;
+  }
+
+  set(index: number, item: T): void {
+    this[index] = item;
+    this.callback();
+  }
+}
+
+
+const serializeField = (generateGetterSetter: (path: (string | number)[]) => HelperClassGetterSetter) => (value: any, path: (string | number)[] = []) => {
+    // if field is array
+    if (Array.isArray(value)) {
+        return value.map((item, index) => {
+            return serializeField(generateGetterSetter)(item, path.concat(index));
+        });
+    } else if (value != null && value.constructor.__genieObjectType == "DataClass") {
+        return {
+            __genieObjectType: "DataClass",
+            __genieObjectClass: value.constructor.name,
+            __genieObjectKey: value[value.genieKey]
+        }
+    } else if (value != null && value.constructor.__genieObjectType == "HelperClass") {
+        (value as HelperClass).localStoreGetterSetter = generateGetterSetter(path);
+        let serializedValue = (value as HelperClass).localStore;
+        serializedValue["__genieObjectType"] = "HelperClass";
+        serializedValue["__genieObjectClass"] = value.constructor.name;
+        return serializedValue;
+    }
+    return value;
+};
+
+const deserializeField = (generateGetterSetter: (path: (string | number)[]) => HelperClassGetterSetter) => (value: any, path: (string | number)[] = []) => {
+    // if field is array
+    if (Array.isArray(value)) {
+        return new ObservableArray((newArray) => {
+                generateGetterSetter(path)[1](serializeField(generateGetterSetter)(newArray, path));
+            },
+            ...value.map((item, index) => {
+                return deserializeField(generateGetterSetter)(item, path.concat(index));
+            }));
+    } else if (value != null && value.__genieObjectType == "DataClass") {
+        return objects[value.__genieObjectClass][value.__genieObjectKey];
+    } else if (value != null && value.__genieObjectType == "HelperClass") {
+        let deserializedValue = new (objects[value.__genieObjectClass] as any)(value);
+        deserializedValue.localStoreGetterSetter = generateGetterSetter(path);
+        return deserializedValue;
+    }
+    return value;
+};
 
 export function GenieClass(comment: string) {
     return function (target: any) {
@@ -76,64 +199,183 @@ export function GenieClass(comment: string) {
             target.ClassDescriptor = new ClassDescriptor(target.name, target.__class_descriptor_functions, target.__class_descriptor_properties, target);
         }
 
-        target._createObject = function (...args: any[]) {
-            const obj = new target(...args);
-            // find all fields
-            let allFields = Object.getOwnPropertyNames(obj);
-            // filter out functions
-            allFields = allFields.filter((field) => {
-                return typeof obj[field] !== "function";
-            });
-            let keyField = obj.genieKey;
-            // check if keyField is in allFields
-            if (allFields.indexOf(keyField) === -1) {
-                throw new Error("keyField " + keyField + " not found in class " + target.name);
-            }
-            // check if keyField exists
-            if (!obj[keyField]) {
-                throw new Error("keyField " + keyField + " not found in object " + obj.constructor.name + "\n" + "Did you have @GenieKey on the key field?");
-            }
-            // save data to store
-            genieDispatch(() => {
-                if (!sharedState[target.name]) {
-                    sharedState[target.name] = {};
+        // if target extends DataClass
+        if (target.prototype instanceof DataClass) {
+
+            target._createObject = function (...args: any[]) {
+                const obj = new target(...args);
+
+                const generateGetterSetter = function(path: (string | number)[]): HelperClassGetterSetter {
+                    return [
+                        () => getJsonByPath(sharedState[target.name][obj[keyField]], path),
+                        (value) => {
+                            genieDispatch(() => {
+                                setSharedState({
+                                    ...sharedState,
+                                    [target.name]: {
+                                        ...sharedState[target.name],
+                                        [obj[keyField]]: setJsonByPath(sharedState[target.name][obj[keyField]], path, value)
+                                    }
+                                });
+                            });
+                        }
+                    ];
                 }
-                // overwrite existing object
-                // if (sharedState[target.name][obj[keyField]]) {
-                //     throw new Error("object with key " + obj[keyField] + " already exists in store");
-                // }
-                sharedState[target.name][obj[keyField]] = {};
+
+                // find all fields
+                let allFields = Object.getOwnPropertyNames(obj);
+                // filter out functions
+                allFields = allFields.filter((field) => {
+                    return typeof obj[field] !== "function";
+                });
+                let keyField = obj.genieKey;
+                // check if keyField is in allFields
+                if (allFields.indexOf(keyField) === -1) {
+                    throw new Error("keyField " + keyField + " not found in class " + target.name);
+                }
+                // check if keyField exists
+                if (!obj[keyField]) {
+                    throw new Error("keyField " + keyField + " not found in object " + obj.constructor.name + "\n" + "Did you have @GenieKey on the key field?");
+                }
+                // save data to store
+                genieDispatch(() => {
+                    let objectState = {};
+                    if (sharedState[target.name]) {
+                        objectState = {
+                            ...sharedState[target.name]
+                        }
+                    }
+                    // overwrite existing object
+                    // if (sharedState[target.name][obj[keyField]]) {
+                    //     throw new Error("object with key " + obj[keyField] + " already exists in store");
+                    // }
+                    objectState[obj[keyField]] = {};
+                    // save all fields
+                    allFields.forEach((field) => {
+                        objectState[obj[keyField]][field] = serializeField(generateGetterSetter)(obj[field], [field]);
+                    });
+                    setSharedState({
+                        ...sharedState,
+                        [target.name]: objectState
+                    });
+                });
+                // replace fields with getters and setters
+                allFields.forEach((field) => {
+                    if (field == keyField) {
+                        return;
+                    }
+                    Object.defineProperty(obj, field, {
+                        get: function () {
+                            let value = sharedState[target.name][obj[keyField]][field];
+                            return deserializeField(generateGetterSetter)(value, [field])
+                        },
+                        set: function (value) {
+                            genieDispatch(() => {
+                                setSharedState({
+                                    ...sharedState,
+                                    [target.name]: {
+                                        ...sharedState[target.name],
+                                        [obj[keyField]]: {
+                                            ...sharedState[target.name][obj[keyField]],
+                                            [field]: serializeField(generateGetterSetter)(value, [field])
+                                        }
+                                    }
+                                });
+                            });
+                        }
+                    });
+                });
+                if (!objects[target.name]) {
+                    objects[target.name] = {};
+                }
+                objects[target.name][obj[keyField]] = obj;
+                return obj;
+            }
+
+            // add a static method to get all objects of this type
+            target.GetObject = function (key: {}) {
+                return objects[target.name][key[target.prototype.genieKey]];
+            }
+        } else if (target.prototype instanceof HelperClass) {
+            target._createObject = function (...args: any[]) {
+                const obj = new target(...args);
+
+                const generateGetterSetter = function(path: (string | number)[]): HelperClassGetterSetter {
+                    return [
+                        () => {
+                            if (obj.localStoreGetterSetter != null) {
+                                obj.localStore = obj.localStoreGetterSetter[0]();
+                            }
+                            return getJsonByPath(obj.localStore, path);
+                        },
+                        (value) => {
+                            genieDispatch(() => {
+                                if (obj.localStoreGetterSetter != null) {
+                                    obj.localStore = obj.localStoreGetterSetter[0]();
+                                }
+                                setJsonByPath(obj.localStore, path, value);
+                                if (obj.localStoreGetterSetter != null) {
+                                    obj.localStoreGetterSetter[1](obj.localStore);
+                                }
+                            });
+                        }
+                    ];
+                }
+
+                // find all fields
+                let allFields = Object.getOwnPropertyNames(obj);
+                // filter out functions
+                allFields = allFields.filter((field) => {
+                    return typeof obj[field] !== "function";
+                });
+
+                (obj as HelperClass).localStore = {}
                 // save all fields
                 allFields.forEach((field) => {
-                    sharedState[target.name][obj[keyField]][field] = obj[field];
+                    (obj as HelperClass).localStore[field] = serializeField(generateGetterSetter)(obj[field], [field]);
                 });
-            });
-            // replace fields with getters and setters
-            allFields.forEach((field) => {
-                if (field == keyField) {
-                    return;
-                }
-                Object.defineProperty(obj, field, {
-                    get: function () {
-                        return sharedState[target.name][obj[keyField]][field];
-                    },
-                    set: function (value) {
-                        genieDispatch(() => {
-                            sharedState[target.name][obj[keyField]][field] = value;
-                        });
-                    }
+
+                let targetObj = target as HelperClass;
+                // replace fields with getters and setters
+                allFields.forEach((field) => {
+                    // get field type
+                    Object.defineProperty(obj, field, {
+                        get: function () {
+                            if (targetObj.localStoreGetterSetter == null) {
+                                targetObj.localStore = targetObj.localStoreGetterSetter[0]();
+                            }
+                            let value = targetObj.localStore[field];
+                            return deserializeField(generateGetterSetter)(value, [field])
+                        },
+                        set: function (value) {
+                            let serializedValue = serializeField(generateGetterSetter)(value, [field]);
+                            targetObj.localStore = targetObj.localStoreGetterSetter[0]();
+                            targetObj.localStore[field] = serializedValue;
+                            targetObj.localStoreGetterSetter[1](targetObj.localStore);
+                        }
+                    });
                 });
-            });
-            if (!objects[target.name]) {
-                objects[target.name] = {};
             }
-            objects[target.name][obj[keyField]] = obj;
-            return obj;
         }
 
-        // add a static method to get all objects of this type
-        target.GetObject = function (key: {}) {
-            return objects[target.name][key[target.prototype.genieKey]];
+        if (target.prototype instanceof DataClass) {
+            // append method `current()` to the class
+            /**
+             * Retrieves all instances of GenieObject in this context
+             * @returns {any} the GenieObject
+             */
+            function All() {
+                let allObjects = [];
+                for (let key in objects[target.name]) {
+                    allObjects.push(objects[target.name][key]);
+                }
+                return allObjects;
+            }
+
+            target.All = All;
+
+            // append additional function descriptor to class descriptor
+            target.ClassDescriptor.functions.add(new FuncDescriptor("All", [], target.ClassDescriptor.className + "[]", true))
         }
 
         if (genieClassModifier) {

@@ -1,6 +1,6 @@
 import "../decorators";
 import * as assert from "assert";
-import {ClassDescriptor, FieldDescriptor, FuncDescriptor, GenieObject} from "../../dsl-descriptor";
+import {ClassDescriptor, FieldDescriptor, FuncDescriptor, DataClass} from "../../dsl-descriptor";
 import {initGenie} from "../decorators";
 import {DateTime, Food, Order, Restaurant} from "../../__test__/example_descriptor";
 
@@ -31,7 +31,7 @@ function sortDescriptor(a: {name: string}, b: {name: string}) {
 }
 
 
-function compareClassDescriptor(a: ClassDescriptor<GenieObject>, b: ClassDescriptor<GenieObject>) {
+function compareClassDescriptor(a: ClassDescriptor<DataClass>, b: ClassDescriptor<DataClass>) {
     assert.equal(a.className, b.className);
     assert.equal(a.classConstructor, b.classConstructor);
     assert.equal(a.functions.size, b.functions.size);

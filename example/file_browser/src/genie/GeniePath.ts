@@ -1,11 +1,11 @@
-import {GenieClass, GenieFunction, GenieKey, GenieProperty, GenieObject, ExampleParse} from "reactgenie-dsl"
+import {GenieClass, GenieFunction, GenieKey, GenieProperty, DataClass, ExampleParse} from "reactgenie-dsl"
 import Path from "path"
 import * as os from "os";
 import * as path from "path";
 import * as fs from "fs";
 
 @GenieClass("A path")
-export class GeniePath extends GenieObject {
+export class GeniePath extends DataClass {
     @GenieKey
     @GenieProperty("Absolute path")
     absoluteString: string;

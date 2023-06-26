@@ -1,4 +1,4 @@
-import {ClassDescriptor, FieldDescriptor, FuncDescriptor, GenieObject, ParamDescriptor} from "../dsl-descriptor";
+import {ClassDescriptor, FieldDescriptor, FuncDescriptor, DataClass, ParamDescriptor} from "../dsl-descriptor";
 import {DateTime} from "./example_descriptor";
 import {NlInterpreter} from "../nl-interpreter";
 import stateJson from "./food_descriptor.state.json";
@@ -61,7 +61,7 @@ function findAllDishes(): SanityDish[] {
     }, new Array<SanityDish>());
 }
 
-class GenieDish extends GenieObject {
+class GenieDish extends DataClass {
     public price: number = 0;
     public created: DateTime = DateTime.today();
     public name: string = "";
@@ -101,7 +101,7 @@ class GenieDish extends GenieObject {
     );
 }
 
-class GenieRestaurant extends GenieObject {
+class GenieRestaurant extends DataClass {
     public name: string = "";
     public created: DateTime = DateTime.today();
     public updated: DateTime = DateTime.today();
@@ -164,7 +164,7 @@ class GenieRestaurant extends GenieObject {
     );
 }
 
-class GenieOrder extends GenieObject {
+class GenieOrder extends DataClass {
 
     static addFoods({dishes}: { dishes: GenieDish[] }) {
         const ids_to_add = dishes.map(dish => dish.id);

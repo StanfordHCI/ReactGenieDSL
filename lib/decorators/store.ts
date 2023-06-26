@@ -14,11 +14,19 @@ export function setSharedStore(store: Store) {
     sharedStore = store;
 }
 
+export function setSharedState(state: {}) {
+    sharedState = state;
+}
+
 export function storeReducer(state: {} = {}, action: { type: string, payload: any }) {
     if (action.type === "genieAction") {
-        sharedState = state;
+        sharedState = {
+            ...state
+        };
         genieActionReturnVal = genieActionFunc();
-        return state;
+        return {
+            ...sharedState
+        };
     }
     return state;
 }
@@ -29,7 +37,7 @@ export function genieDispatch(func: () => any) {
         return func();
     } else {
         genieActionFunc = func;
-        sharedStore.dispatch({type: "genieAction", payload: genieActionReturnVal});
+        sharedStore.dispatch({type: "genieAction", payload: {}});
         genieActionFunc = null;
         return genieActionReturnVal;
     }

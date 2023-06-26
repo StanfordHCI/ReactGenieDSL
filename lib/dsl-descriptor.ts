@@ -1,19 +1,11 @@
+let constructorInCreateObject = false;
+
 export class GenieObject {
-  private readonly _initParams: any;
-  static genieKey: string;
-
-  constructor(initParams: any) {
-    this._initParams = initParams;
-  }
-
-  // noinspection JSUnusedGlobalSymbols
-  _getConstructorParams(): any {
-    const name = this.constructor.prototype.genieKey;
-    return {name: this[name]}
-  }
-
-  // placeholder, other code that should run after initGenie
-  setup() {
+  static __genieObjectType: string;
+  constructor({}) {
+    if (!constructorInCreateObject) {
+      console.error("Constructor not called in CreateObject\nAll GenieObject should be created using CreateObject");
+    }
   }
 
   // placeholder, should be replaced by GenieClass decorator
@@ -22,11 +14,40 @@ export class GenieObject {
   }
 
   static CreateObject<T extends typeof GenieObject>(this: T, ...args: any[]): InstanceType<T> {
-    return this._createObject(...args);
+    constructorInCreateObject = true;
+    let returnValue = this._createObject(...args);
+    constructorInCreateObject = false;
+    return returnValue;
+  }
+  
+  // placeholder, other code that should run after initGenie
+  static setup() {
+  }
+}
+
+/**
+ * DataClass are objects that controls the interactions.
+ *
+ * DataClass will be automatically indexed by ReactGenie.
+ */
+export class DataClass extends GenieObject {
+  static genieKey: string;
+  static __genieObjectType: string = "DataClass";
+
+  constructor({}) {
+    super({});
+  }
+
+  // noinspection JSUnusedGlobalSymbols
+  _getConstructorParams(): any {
+    const name = this.constructor.prototype.genieKey;
+    return {
+      [name]: this[name]
+    };
   }
 
   // placeholder, should be replaced by GenieClass decorator
-  static GetObject<T extends typeof GenieObject>(this: T, ...args: any[]): InstanceType<T> {
+  static GetObject<T extends typeof DataClass>(this: T, ...args: any[]): InstanceType<T> {
     throw new Error("Not implemented. Did you forget to decorate the class with @GenieClass?");
   }
 
@@ -34,7 +55,27 @@ export class GenieObject {
     return this;
   }
 
-  static ClassDescriptor: ClassDescriptor<GenieObject>;
+  static ClassDescriptor: ClassDescriptor<DataClass>;
+}
+
+export type HelperClassGetter = () => {};
+export type HelperClassSetter = (value: {}) => void;
+export type HelperClassGetterSetter = [HelperClassGetter, HelperClassSetter];
+
+/**
+ * Helper class are for storing complex data types in DataClass.
+ */
+export class HelperClass extends GenieObject {
+  localStore: {} = null;
+  localStoreGetterSetter: HelperClassGetterSetter = null;
+  static __genieObjectType: string = "HelperClass";
+
+  constructor(value: {__genieObjectType: {}} | {}) {
+    super(value);
+    if (value && value.hasOwnProperty("__genieObjectType")) {
+      this.localStore = value;
+    }
+  }
 }
 
 export class ParamDescriptor {

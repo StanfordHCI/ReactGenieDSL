@@ -165,14 +165,14 @@ export class DslInterpreter {
      **/
     public interpret(input: string): any {
         const ast = parse(input);
-        console.log(JSON.stringify(ast));
+        // console.log(JSON.stringify(ast));
         // ast = {"type":"access","parent":{"type":"access","parent":"Restaurant","access":{"type":"function_call","func_name":"current","parameters":null}},"access":{"type":"function_call","func_name":"book","parameters":[{"parameter":"dateTime","value":{"type":"function_call","func_name":"DateTime","parameters":[{"parameter":"year","value":{"type":"int","value":2020}},{"parameter":"month","value":{"type":"int","value":1}},{"parameter":"day","value":{"type":"int","value":1}},{"parameter":"hour","value":{"type":"int","value":12}},{"parameter":"minute","value":{"type":"int","value":0}}]}}]}}
         return this.resolve(ast);
     }
 
     public interpretSteps(input: string): any[] {
         const ast = parse(input);
-        console.log(JSON.stringify(ast));
+        // console.log(JSON.stringify(ast));
         this.resolveSteps = [];
         this.resolveStepsEnabled = true;
         this.resolve(ast);

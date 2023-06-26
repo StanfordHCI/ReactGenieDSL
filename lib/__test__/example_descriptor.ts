@@ -1,11 +1,18 @@
-import {ClassDescriptor, FieldDescriptor, FuncDescriptor, GenieObject, ParamDescriptor} from "../dsl-descriptor";
+import {
+  ClassDescriptor,
+  FieldDescriptor,
+  FuncDescriptor,
+  DataClass,
+  ParamDescriptor,
+  HelperClass
+} from "../dsl-descriptor";
 import {ExampleParse} from "../nl";
 import {float, GenieClass, GenieFunction, GenieKey, GenieProperty, int, LazyType} from "../decorators";
 
 export let recentBooking = null;
 
-
-export class DateTime extends GenieObject {
+@GenieClass("Representing a date and time")
+export class DateTime extends HelperClass {
   private date: Date;
 
   public year: number;
@@ -25,7 +32,7 @@ export class DateTime extends GenieObject {
   }
 
   static today() {
-    return new DateTime({ year: 2020, month: 2, day: 4, hour: 12, minute: 0 });
+    return DateTime.CreateObject({ year: 2020, month: 2, day: 4, hour: 12, minute: 0 });
   }
 
   static sunday = 0
@@ -37,7 +44,7 @@ export class DateTime extends GenieObject {
   static saturday = 6
 
   static fromDate(date: Date) {
-    const dt = new DateTime({});
+    const dt = DateTime.CreateObject({});
     dt.date = date;
     dt.updateDate();
     return dt;
@@ -61,7 +68,7 @@ export class DateTime extends GenieObject {
   }
 
   constructor({year = undefined, month = undefined, day = undefined, hour = undefined, minute = undefined}: { year?: number, month?: number, day?: number, hour?: number, minute?: number }) {
-    super({year, month, day, hour, minute});
+    super({});
     this.date = new Date();
     this.setDate({year, month, day, hour, minute});
   }
@@ -158,7 +165,7 @@ export class DateTime extends GenieObject {
 }
 
 @GenieClass("A food item")
-export class Food extends GenieObject {
+export class Food extends DataClass {
   static _all: Food[] = [];
 
   @GenieFunction("Get all food items")
@@ -175,7 +182,7 @@ export class Food extends GenieObject {
   public restaurant: LazyType<Restaurant>;
 
   constructor({name, price, restaurant} : {name: string, price: float, restaurant: LazyType<Restaurant>}) {
-    super({name: name});
+    super({});
     this.name = name;
     this.price = price;
     this.restaurant = restaurant;
@@ -206,7 +213,7 @@ export class Food extends GenieObject {
 
 
 @GenieClass("An Order")
-export class Order extends GenieObject {
+export class Order extends DataClass {
   static _all: Order[] = [];
   @GenieFunction("Get all orders")
   static all(): Order[] {
@@ -286,7 +293,7 @@ export class Order extends GenieObject {
 
 
 @GenieClass("A restaurant")
-export class Restaurant extends GenieObject {
+export class Restaurant extends DataClass {
   static _all: Restaurant[] = undefined
   @GenieProperty("Past orders of the restaurant")
   public orders: Order[] = [];
@@ -310,17 +317,17 @@ export class Restaurant extends GenieObject {
       mcDonald.createFood("Coca Cola Coke", 2);
       mcDonald.createOrder(
           (Order.all().length+1).toString(),
-        new DateTime({ year: 2020, month: 1, day: 1, hour: 12, minute: 0 }),
+        DateTime.CreateObject({ year: 2020, month: 1, day: 1, hour: 12, minute: 0 }),
         [mcDonald.menu[0], mcDonald.menu[1]]
       );
       mcDonald.createOrder(
           (Order.all().length+1).toString(),
-        new DateTime({ year: 2020, month: 1, day: 1, hour: 13, minute: 0 }),
+        DateTime.CreateObject({ year: 2020, month: 1, day: 1, hour: 13, minute: 0 }),
         [mcDonald.menu[2], mcDonald.menu[3]]
       );
       mcDonald.createOrder(
           (Order.all().length+1).toString(),
-        new DateTime({ year: 2020, month: 2, day: 1, hour: 14, minute: 0 }),
+        DateTime.CreateObject({ year: 2020, month: 2, day: 1, hour: 14, minute: 0 }),
         [mcDonald.menu[4], mcDonald.menu[5]]
       );
 
@@ -329,7 +336,7 @@ export class Restaurant extends GenieObject {
       kfc.createFood("Pepsi Coke", 2);
       kfc.createOrder(
           (Order.all().length+1).toString(),
-        new DateTime({ year: 2020, month: 1, day: 1, hour: 15, minute: 0 }),
+        DateTime.CreateObject({ year: 2020, month: 1, day: 1, hour: 15, minute: 0 }),
         [kfc.menu[0], kfc.menu[1]]
       )
 
