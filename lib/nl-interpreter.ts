@@ -13,13 +13,17 @@ export class NlInterpreter {
     private apiKey: string,
     private prompt?: PromptGen,
     private examples?: ExampleParse[],
-    private extraPrompt?: string
+    private extraPrompt?: string,
+    private basePath: string = undefined
   ) {
+    if (this.basePath === undefined) {
+      this.basePath = "https://api.openai.com/v1";
+    }
     if (this.prompt === undefined) {
       console.assert(this.examples !== undefined)
       this.prompt = new DescriptorPromptGen(this.descriptions, this.examples, extraPrompt);
     }
-    this.nlParser = new NlParser(this.prompt, apiKey);
+    this.nlParser = new NlParser(this.prompt, apiKey, basePath);
     this.dslInterpreter = new DslInterpreter(descriptions);
   }
 

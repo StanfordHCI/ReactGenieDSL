@@ -227,7 +227,7 @@ export const GenieClassesExamples = [
 jest.setTimeout(30000);
 
 test('Simple function', async () => {
-    const interpreter = new NlInterpreter(GenieClassDescriptors, process.env.api_key, undefined, GenieClassesExamples);
+    const interpreter = new NlInterpreter(GenieClassDescriptors, process.env.api_key, undefined, GenieClassesExamples, process.env.baseurl);
     const funcCallResult = await interpreter.interpret('add a sub to basket');
     expect(funcCallResult).toEqual({
         "objectType": "void",

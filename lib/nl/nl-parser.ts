@@ -4,9 +4,10 @@ import {Configuration, OpenAIApi} from "openai";
 export class NlParser {
   private openAiApi: OpenAIApi;
 
-  constructor(private prompt: PromptGen, private apiKey: string) {
+  constructor(private prompt: PromptGen, private apiKey: string, private basePath: string) {
     const configuration = new Configuration({
       apiKey: this.apiKey,
+      basePath: this.basePath
     });
     this.openAiApi = new OpenAIApi(configuration);
   }
