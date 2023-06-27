@@ -16,7 +16,7 @@ export class NlInterpreter {
     private extraPrompt?: string,
     private basePath: string = undefined
   ) {
-    if (this.basePath === undefined) {
+    if (basePath === undefined) {
       this.basePath = "https://api.openai.com/v1";
     }
     if (this.prompt === undefined) {

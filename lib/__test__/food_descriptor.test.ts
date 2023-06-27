@@ -4,11 +4,12 @@ import {
   FuncDescriptor,
   DataClass,
   ParamDescriptor,
-} from "../dsl-descriptor";
-import { DateTime } from "./example_descriptor";
-import { NlInterpreter } from "../nl-interpreter";
-import stateJson from "./food_descriptor.state.json";
-import { initGenie } from "../decorators";
+} from '../dsl-descriptor';
+import { DateTime } from './example_descriptor';
+import { NlInterpreter } from '../nl-interpreter';
+import stateJson from './food_descriptor.state.json';
+import { initGenie } from '../decorators';
+
 initGenie();
 
 export interface SanityDish {
@@ -70,9 +71,9 @@ function findAllDishes(): SanityDish[] {
 class GenieDish extends DataClass {
   public price: number = 0;
   public created: DateTime = DateTime.today();
-  public name: string = "";
-  public short_description: string = "";
-  public id: string = "";
+  public name: string = '';
+  public short_description: string = '';
+  public id: string = '';
 
   description(): {} {
     return {
@@ -97,31 +98,31 @@ class GenieDish extends DataClass {
   }
 
   static ClassDescriptor = new ClassDescriptor<GenieDish>(
-    "Dish",
-    [new FuncDescriptor("all", [], "Dish[]", true)],
+    'Dish',
+    [new FuncDescriptor('all', [], 'Dish[]', true)],
     [
-      new FieldDescriptor("price", "int", false),
-      new FieldDescriptor("created", "DateTime", false),
-      new FieldDescriptor("name", "string", false),
-      new FieldDescriptor("short_description", "string", false),
+      new FieldDescriptor('price', 'int', false),
+      new FieldDescriptor('created', 'DateTime', false),
+      new FieldDescriptor('name', 'string', false),
+      new FieldDescriptor('short_description', 'string', false),
     ],
     GenieDish
   );
 }
 
 class GenieRestaurant extends DataClass {
-  public name: string = "";
+  public name: string = '';
   public created: DateTime = DateTime.today();
   public updated: DateTime = DateTime.today();
-  public address: string = "";
+  public address: string = '';
   public dishes: GenieDish[] = [];
   public rating: number = 0;
-  public short_description: string = "";
-  public id: string = "";
+  public short_description: string = '';
+  public id: string = '';
 
   static all(): GenieRestaurant[] {
     console.log(
-      "all_restaurants" +
+      'all_restaurants' +
         state.restaurant.restaurants.map((r) =>
           GenieRestaurant.fromSanityRestaurant(r)
         )
@@ -169,25 +170,25 @@ class GenieRestaurant extends DataClass {
   }
 
   static ClassDescriptor = new ClassDescriptor<GenieRestaurant>(
-    "Restaurant",
+    'Restaurant',
     [
-      new FuncDescriptor("all", [], "Restaurant[]", true),
-      new FuncDescriptor("current", [], "Restaurant", true),
+      new FuncDescriptor('all', [], 'Restaurant[]', true),
+      new FuncDescriptor('current', [], 'Restaurant', true),
       new FuncDescriptor(
-        "select",
-        [new ParamDescriptor("restaurant", "Restaurant", true)],
-        "void",
+        'select',
+        [new ParamDescriptor('restaurant', 'Restaurant', true)],
+        'void',
         true
       ),
     ],
     [
-      new FieldDescriptor("name", "string", false),
-      new FieldDescriptor("created", "DateTime", false),
-      new FieldDescriptor("updated", "DateTime", false),
-      new FieldDescriptor("address", "string", false),
-      new FieldDescriptor("dishes", "Dish[]", true),
-      new FieldDescriptor("rating", "int", false),
-      new FieldDescriptor("short_description", "string", false),
+      new FieldDescriptor('name', 'string', false),
+      new FieldDescriptor('created', 'DateTime', false),
+      new FieldDescriptor('updated', 'DateTime', false),
+      new FieldDescriptor('address', 'string', false),
+      new FieldDescriptor('dishes', 'Dish[]', true),
+      new FieldDescriptor('rating', 'int', false),
+      new FieldDescriptor('short_description', 'string', false),
     ],
     GenieRestaurant
   );
@@ -214,21 +215,21 @@ class GenieOrder extends DataClass {
   }
 
   static ClassDescriptor = new ClassDescriptor<GenieOrder>(
-    "Order",
+    'Order',
     [
       new FuncDescriptor(
-        "addFoods",
-        [new ParamDescriptor("dishes", "Dish[]", true)],
-        "void",
+        'addFoods',
+        [new ParamDescriptor('dishes', 'Dish[]', true)],
+        'void',
         true
       ),
       new FuncDescriptor(
-        "removeFoods",
-        [new ParamDescriptor("dishes", "Dish[]", true)],
-        "void",
+        'removeFoods',
+        [new ParamDescriptor('dishes', 'Dish[]', true)],
+        'void',
         true
       ),
-      new FuncDescriptor("orderedFoods", [], "Dish[]", true),
+      new FuncDescriptor('orderedFoods', [], 'Dish[]', true),
     ],
     [],
     GenieOrder
@@ -247,22 +248,22 @@ export const GenieClassDescriptors = [
 ];
 export const GenieClassesExamples = [
   {
-    user_utterance: "select subway",
+    user_utterance: 'select subway',
     example_parsed:
       'Restaurant.select(restaurant: Restaurant.all().matching(field: .name, value: "subway")[0])',
   },
   {
-    user_utterance: "order steak",
+    user_utterance: 'order steak',
     example_parsed:
       'Order.addFoods(dishes: [Dish.all().matching(field: .name, value: "steak")])',
   },
   {
-    user_utterance: "order fries from current restaurant",
+    user_utterance: 'order fries from current restaurant',
     example_parsed:
       'Order.addFoods(dishes: [Restaurant.current().dishes.matching(field: .name, value: "fries")])\n',
   },
   {
-    user_utterance: "add two hamburgers",
+    user_utterance: 'add two hamburgers',
     example_parsed:
       'Order.addFoods(dishes: [Dish.all().matching(field: .name, value: "hamburger")[0], Dish.all().matching(field: .name, value: "hamburger")[0]])',
   },
@@ -270,17 +271,17 @@ export const GenieClassesExamples = [
 
 jest.setTimeout(30000);
 
-test("Simple function", async () => {
+test('Simple function', async () => {
   const interpreter = new NlInterpreter(
     GenieClassDescriptors,
-    process.env.api_key,
+    process.env.OPENAI_API_KEY,
     undefined,
     GenieClassesExamples,
-    process.env.baseurl
+    process.env.OPENAI_API_BASE_URL
   );
-  const funcCallResult = await interpreter.interpret("add a sub to basket");
+  const funcCallResult = await interpreter.interpret('add a sub to basket');
   expect(funcCallResult).toEqual({
-    objectType: "void",
-    type: "object",
+    objectType: 'void',
+    type: 'object',
   });
 });

@@ -1,38 +1,38 @@
-import { NlInterpreter } from "../nl-interpreter";
-import { allDescriptors, examples } from "./example_descriptor";
-import { initGenie } from "../decorators";
+import { NlInterpreter } from '../nl-interpreter';
+import { allDescriptors, examples } from './example_descriptor';
+import { initGenie } from '../decorators';
 
 initGenie();
 
 jest.setTimeout(30000);
 
-test("Simple function", async () => {
+test('Simple function', async () => {
   const interpreter = new NlInterpreter(
     allDescriptors,
-    process.env.api_key,
+    process.env.OPENAI_API_KEY,
     undefined,
     examples,
-    process.env.base_url
+    process.env.OPENAI_API_BASE_URL
   );
   const funcCallResult = await interpreter.interpret(
-    "what is the name of the hamburger?"
+    'what is the name of the hamburger?'
   );
   expect(funcCallResult).toEqual({
-    objectType: "string",
-    type: "object",
-    value: "Hamburger",
+    objectType: 'string',
+    type: 'object',
+    value: 'Hamburger',
   });
 });
 
-test("Intermediate function", async () => {
+test('Intermediate function', async () => {
   const interpreter = new NlInterpreter(
     allDescriptors,
-    process.env.api_key,
+    process.env.OPENAI_API_KEY,
     undefined,
     examples,
-    process.env.base_url
+    process.env.OPENAI_API_BASE_URL
   );
-  const user_utterance = "get me the cheapest restaurant in palo alto";
+  const user_utterance = 'get me the cheapest restaurant in palo alto';
   const parsed = await interpreter.nlParser.parse(user_utterance);
   const funcCallResult = await interpreter.dslInterpreter.interpret(parsed);
   const resultString = JSON.stringify(funcCallResult.value.description());

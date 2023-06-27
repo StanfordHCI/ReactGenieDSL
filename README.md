@@ -26,8 +26,6 @@ Installation can be done through `npm`.
   npm install --dev reactgenie-dsl
   ```
 
-
-
 ### Creating Genie Class Objects
 ReactGenie objects are created by extending the `GenieObject` class. These objects are used to define states in your app
 for state management. A ReactGenie object has the following descriptors,
@@ -101,7 +99,6 @@ returning the results. The interpreter uses the `nlParser.parse method` to parse
 Please look at the [File Browser Example](https://github.com/StanfordHCI/ReactGenieDSL/tree/main/example/file_browser) 
 for more details on how to use the interpreter.
 
-
 ## Contributing to the Library
 Contributions to ReactGenieDSL are welcome! The following sections will provide instructions on how to set up your
 development environment and run tests.
@@ -128,13 +125,8 @@ Make sure to include ReactGenieDSL as a dependency in your `package.json` file, 
 
 
 ### Running ReactGenie DSL
-This command sets an environment variable api_key to your Open AI API key. This step is necessary because ReactGenieDSL
-relies on Open AI for generating error messages.
+
+First, copy the .env.example file as .env and fill in the OPENAI_API_KEY and BASEURL if needed. 
 
 By executing `npx jest`, you trigger the test runner to execute tests that verify state management. The test results
 will be displayed in the terminal, indicating whether the tests passed or failed.
-
-```bash
-export api_key=sk-***** # your api key here
-npx jest
-```
