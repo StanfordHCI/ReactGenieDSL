@@ -1,13 +1,17 @@
-import {PromptGen} from "./prompt-gen";
-import {Configuration, OpenAIApi} from "openai";
+import { PromptGen } from "./prompt-gen";
+import { Configuration, OpenAIApi } from "openai";
 
 export class NlParser {
   private openAiApi: OpenAIApi;
 
-  constructor(private prompt: PromptGen, private apiKey: string, private basePath: string) {
+  constructor(
+    private prompt: PromptGen,
+    private apiKey: string,
+    private basePath: string
+  ) {
     const configuration = new Configuration({
       apiKey: this.apiKey,
-      basePath: this.basePath
+      basePath: this.basePath,
     });
     this.openAiApi = new OpenAIApi(configuration);
   }
@@ -24,7 +28,7 @@ export class NlParser {
       presence_penalty: 0,
       stop: ["\n"],
     });
-    return await (response).data.choices[0]?.text.trim();
+    return await response.data.choices[0]?.text.trim();
   }
 
   async parseGpt4(nl: string): Promise<string | null> {
@@ -46,13 +50,17 @@ export class NlParser {
         {
           role: "user",
           content: prompt,
-        }
-      ]
-    })
-    return await (response).data.choices[0]?.message.content.trim();
+        },
+      ],
+    });
+    return await response.data.choices[0]?.message.content.trim();
   }
 
-  async respond(nl: string, parsed: string, result: string): Promise<string | null> {
+  async respond(
+    nl: string,
+    parsed: string,
+    result: string
+  ): Promise<string | null> {
     const prompt = this.prompt.response_prompt(nl, parsed, result);
     const response = await this.openAiApi.createCompletion({
       model: "text-davinci-003",
@@ -64,6 +72,6 @@ export class NlParser {
       presence_penalty: 0,
       stop: ["\n", "user:"],
     });
-    return await (response).data.choices[0]?.text.trim();
+    return await response.data.choices[0]?.text.trim();
   }
 }

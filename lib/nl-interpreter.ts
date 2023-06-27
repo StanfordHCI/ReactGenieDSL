@@ -1,8 +1,8 @@
-import {PromptGen} from "./nl";
-import {ClassDescriptor, GenieObject} from "./dsl-descriptor";
-import {NlParser} from "./nl";
-import {DslInterpreter} from "./dsl";
-import {DescriptorPromptGen, ExampleParse} from "./nl/prompt-gen";
+import { PromptGen } from "./nl";
+import { ClassDescriptor, GenieObject } from "./dsl-descriptor";
+import { NlParser } from "./nl";
+import { DslInterpreter } from "./dsl";
+import { DescriptorPromptGen, ExampleParse } from "./nl/prompt-gen";
 
 export class NlInterpreter {
   public nlParser: NlParser;
@@ -20,8 +20,12 @@ export class NlInterpreter {
       this.basePath = "https://api.openai.com/v1";
     }
     if (this.prompt === undefined) {
-      console.assert(this.examples !== undefined)
-      this.prompt = new DescriptorPromptGen(this.descriptions, this.examples, extraPrompt);
+      console.assert(this.examples !== undefined);
+      this.prompt = new DescriptorPromptGen(
+        this.descriptions,
+        this.examples,
+        extraPrompt
+      );
     }
     this.nlParser = new NlParser(this.prompt, apiKey, basePath);
     this.dslInterpreter = new DslInterpreter(descriptions);
@@ -35,7 +39,11 @@ export class NlInterpreter {
     return this.dslInterpreter.interpret(command);
   }
 
-  async respond(nl: string, parsed: string, result: string): Promise<string | null> {
+  async respond(
+    nl: string,
+    parsed: string,
+    result: string
+  ): Promise<string | null> {
     return await this.nlParser.respond(nl, parsed, result);
   }
 }

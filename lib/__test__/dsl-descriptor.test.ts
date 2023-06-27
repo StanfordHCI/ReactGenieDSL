@@ -1,8 +1,9 @@
-import {Restaurant} from './example_descriptor'
+import { Restaurant } from "./example_descriptor";
 
 test("Restaurant Description", async () => {
   const description = Restaurant._ClassDescriptor.description();
-  expect(description).toEqual("class Restaurant {\n" +
+  expect(description).toEqual(
+    "class Restaurant {\n" +
       "\tstring name;\n" +
       "\tFood[] menu;\n" +
       "\tint rating;\n" +
@@ -16,5 +17,6 @@ test("Restaurant Description", async () => {
       "\tstatic Restaurant current();\n" +
       "\t// Book a table for a given date time\n" +
       "\tvoid book(dateTime: DateTime);\n" +
-      "}");
+      "}"
+  );
 });
