@@ -197,6 +197,8 @@ const serializeField =
       let serializedValue = (value as HelperClass).localStore;
       serializedValue["__genieObjectType"] = "HelperClass";
       serializedValue["__genieObjectClass"] = value.constructor.name;
+
+      // console.log(typeof serializedValue["__genieObjectClass"]);
       return serializedValue;
     }
     return value;
@@ -225,9 +227,8 @@ const deserializeField =
     } else if (value != null && value.__genieObjectType == "DataClass") {
       return objects[value.__genieObjectClass][value.__genieObjectKey];
     } else if (value != null && value.__genieObjectType == "HelperClass") {
-      let deserializedValue = new (objects[value.__genieObjectClass] as any)(
-        value
-      );
+      let obj = AllGenieObjects[value.__genieObjectClass] as (typeof HelperClass);
+      let deserializedValue = obj.CreateObject(value);
       deserializedValue.localStoreGetterSetter = generateGetterSetter(path);
       return deserializedValue;
     }
@@ -315,6 +316,7 @@ export function GenieClass(comment: string) {
           objectState[obj[keyField]] = {};
           // save all fields
           allFields.forEach((field) => {
+            // console.log(field, obj[field])
             objectState[obj[keyField]][field] = serializeField(
               generateGetterSetter
             )(obj[field], [field]);
@@ -364,7 +366,7 @@ export function GenieClass(comment: string) {
         return objects[target.name][key[target.prototype.genieKey]];
       };
     } else if (target.prototype instanceof HelperClass) {
-      target._createObject = function (...args: any[]) {
+      target._createObject = function (...args: any[]){
         const obj = new target(...args);
 
         const generateGetterSetter = function (
@@ -395,7 +397,8 @@ export function GenieClass(comment: string) {
         let allFields = Object.getOwnPropertyNames(obj);
         // filter out functions
         allFields = allFields.filter((field) => {
-          return typeof obj[field] !== "function";
+          // console.log(field);
+          return typeof obj[field] !== "function" && field !=="localStore" && field !=="localStoreGetterSetter";
         });
 
         (obj as HelperClass).localStore = {};
@@ -405,14 +408,16 @@ export function GenieClass(comment: string) {
             generateGetterSetter
           )(obj[field], [field]);
         });
+        // console.log(obj.localStore)
 
-        let targetObj = target as HelperClass;
+        let targetObj = obj as HelperClass;//??
         // replace fields with getters and setters
+        // console.log(allFields);
         allFields.forEach((field) => {
           // get field type
           Object.defineProperty(obj, field, {
             get: function () {
-              if (targetObj.localStoreGetterSetter == null) {
+              if (targetObj.localStoreGetterSetter != null) {
                 targetObj.localStore = targetObj.localStoreGetterSetter[0]();
               }
               let value = targetObj.localStore[field];
@@ -423,12 +428,18 @@ export function GenieClass(comment: string) {
                 value,
                 [field]
               );
-              targetObj.localStore = targetObj.localStoreGetterSetter[0]();
+              if (targetObj.localStoreGetterSetter != null) {
+                targetObj.localStore = targetObj.localStoreGetterSetter[0]();
+              }
               targetObj.localStore[field] = serializedValue;
-              targetObj.localStoreGetterSetter[1](targetObj.localStore);
+              if (targetObj.localStoreGetterSetter != null) {
+                targetObj.localStoreGetterSetter[1](targetObj.localStore);
+              }
+              
             },
           });
         });
+        return obj;
       };
     }
 
