@@ -6,18 +6,16 @@ import {
   DataClass,
   ParamDescriptor,
   HelperClass,
-  HelperClassGetterSetter,
+  HelperClassGetterSetter, GenieObject,
 } from "../dsl-descriptor";
 import { Store } from "redux";
 import { configureStore } from "@reduxjs/toolkit";
 import {
   genieDispatch,
   objects,
-  originalClasses,
   setSharedState,
   setSharedStore,
   sharedState,
-  sharedStore,
   storeReducer,
 } from "./store";
 
@@ -100,10 +98,6 @@ export function initGenie({
   return genieStore;
 }
 
-interface ClassWithDescriptor<T extends DataClass> {
-  ClassDescriptor: ClassDescriptor<T>;
-}
-
 export type LazyType<T> = T;
 
 function getJsonByPath(json: any, path: (string | number)[]): any {
@@ -118,10 +112,20 @@ function setJsonByPath(json: any, path: (string | number)[], value: any): any {
   if (path.length === 0) {
     return value;
   } else {
-    return {
-      ...json,
-      [path[0]]: setJsonByPath(json[path[0]], path.slice(1), value),
-    };
+    if (Array.isArray(json)) {
+        const array = json as any[];
+        const index = path[0] as number;
+        return [
+            ...array.slice(0, index),
+            setJsonByPath(array[index], path.slice(1), value),
+            ...array.slice(index + 1),
+        ];
+    } else {
+      return {
+        ...json,
+        [path[0]]: setJsonByPath(json[path[0]], path.slice(1), value),
+      };
+    }
   }
 }
 
@@ -167,6 +171,10 @@ class ObservableArray<T> extends Array<T> {
     this[index] = item;
     this.callback();
   }
+
+  map<U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: any): U[] {
+    return [...super.map(callbackfn, thisArg)];
+  }
 }
 
 const serializeField =
@@ -195,6 +203,12 @@ const serializeField =
       (value as HelperClass).localStoreGetterSetter =
         generateGetterSetter(path);
       let serializedValue = (value as HelperClass).localStore;
+      if (serializedValue == null) {
+        throw new Error(
+            "HelperClass is not initialized.\n" +
+            "Please make sure to use CreateObject() to create HelperClass instance."
+        );
+      }
       serializedValue["__genieObjectType"] = "HelperClass";
       serializedValue["__genieObjectClass"] = value.constructor.name;
 
@@ -298,7 +312,8 @@ export function GenieClass(comment: string) {
               " not found in object " +
               obj.constructor.name +
               "\n" +
-              "Did you have @GenieKey on the key field?"
+              "Did you have @GenieKey on the key field?\n" +
+              "Did set the key field in the constructor?"
           );
         }
         // save data to store
@@ -431,11 +446,14 @@ export function GenieClass(comment: string) {
               if (targetObj.localStoreGetterSetter != null) {
                 targetObj.localStore = targetObj.localStoreGetterSetter[0]();
               }
-              targetObj.localStore[field] = serializedValue;
+              targetObj.localStore = {
+                ...targetObj.localStore,
+                [field]: serializedValue,
+              };
               if (targetObj.localStoreGetterSetter != null) {
                 targetObj.localStoreGetterSetter[1](targetObj.localStore);
               }
-              
+
             },
           });
         });
@@ -476,7 +494,7 @@ export function GenieClass(comment: string) {
 
     AllGenieObjects[target.name] = target;
     if (genieInitialized) {
-      target.prototype.setup();
+      (target as (typeof GenieObject)).setup();
     }
     return target;
   };

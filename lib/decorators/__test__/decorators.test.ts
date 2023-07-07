@@ -4,15 +4,16 @@ import {
   ClassDescriptor,
   FieldDescriptor,
   FuncDescriptor,
-  DataClass,
+  DataClass, HelperClass,
 } from "../../dsl-descriptor";
-import { initGenie } from "../decorators";
+import {GenieClass, GenieKey, GenieProperty, initGenie} from "../decorators";
 import {
   DateTime,
   Food,
   Order,
   Restaurant,
 } from "../../__test__/example_descriptor";
+import {genieDispatch} from "../store";
 
 initGenie();
 
@@ -122,4 +123,51 @@ test("Order Descriptor", async () => {
       minute: 0,
     }).toString()
   );
+});
+
+@GenieClass("To-do list item")
+class TodoListItem extends HelperClass {
+  @GenieProperty("Name of the item")
+  name: string;
+  @GenieProperty("Whether the item is done")
+  done: boolean;
+
+  constructor({name, done}: {name: string, done: boolean}) {
+    super({});
+    this.name = name;
+    this.done = done;
+  }
+}
+
+@GenieClass("To-do list")
+class TodoList extends DataClass {
+  @GenieKey
+  @GenieProperty("Name of the list")
+  name: string;
+  @GenieProperty("Items in the list")
+  items: TodoListItem[];
+
+  constructor({name, items}: {name: string, items: TodoListItem[]}) {
+    super({});
+    this.name = name;
+    this.items = items;
+  }
+
+  static setup() {
+    TodoList.CreateObject({name: "Groceries", items: [
+        TodoListItem.CreateObject({name: "Milk", done: false}),
+        TodoListItem.CreateObject({name: "Eggs", done: false}),
+        TodoListItem.CreateObject({name: "Bread", done: false}),
+        ]});
+  }
+}
+
+test("Change TodoList", async () => {
+  genieDispatch(() => {
+    var grocieriesList = TodoList.GetObject({name: "Groceries"})
+    var item = grocieriesList.items[0];
+    item.done = true;
+    var grocieriesListItems = grocieriesList.items;
+    grocieriesListItems.push(TodoListItem.CreateObject({name: "Butter", done: false}));
+  });
 });
