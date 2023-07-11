@@ -65,6 +65,15 @@ export class DataClass extends GenieObject {
     );
   }
 
+  static DeletedObject<T extends typeof DataClass>(
+    this: T,
+    ...args: any[]
+  ): InstanceType<T> {
+    throw new Error(
+      "Not implemented. Did you forget to decorate the class with @GenieClass?"
+    );
+  }
+
   description(): {} {
     return this;
   }

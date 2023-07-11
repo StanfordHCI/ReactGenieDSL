@@ -380,6 +380,12 @@ export function GenieClass(comment: string) {
       target.GetObject = function (key: {}) {
         return objects[target.name][key[target.prototype.genieKey]];
       };
+
+      target.DeletedObject = function (key: {}) {
+        let obj = objects[target.name][key[target.prototype.genieKey]];
+        delete objects[target.name][key[target.prototype.genieKey]];
+        return obj;
+      }
     } else if (target.prototype instanceof HelperClass) {
       target._createObject = function (...args: any[]){
         const obj = new target(...args);
