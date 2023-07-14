@@ -381,7 +381,7 @@ export function GenieClass(comment: string) {
         return objects[target.name][key[target.prototype.genieKey]];
       };
 
-      target.DeletedObject = function (key: {}) {
+      target.DeleteObject = function (key: {}) {
         let obj = objects[target.name][key[target.prototype.genieKey]];
         delete objects[target.name][key[target.prototype.genieKey]];
         return obj;

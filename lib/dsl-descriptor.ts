@@ -65,7 +65,7 @@ export class DataClass extends GenieObject {
     );
   }
 
-  static DeletedObject<T extends typeof DataClass>(
+  static DeleteObject<T extends typeof DataClass>(
     this: T,
     ...args: any[]
   ): InstanceType<T> {
