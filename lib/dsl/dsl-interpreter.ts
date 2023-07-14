@@ -395,17 +395,33 @@ export class DslInterpreter {
    */
   private resolveAccess(ast: any, env: any) {
     console.assert(env == null);
-    const parent =
-      typeof ast.parent === "string"
-        ? { type: "class", value: ast.parent }
-        : this.resolve(ast.parent, null);
+    let parent;
+    if (typeof ast.parent === "string") {
+      parent = { type: "class", value: ast.parent };
+    } else if (ast.parent.type === "object") {
+      parent = ast.parent;
+    } else {
+      parent = this.resolve(ast.parent, null);
+    }
     if (typeof ast.access === "string") {
       const isObject = parent.type === "object";
       const className = isObject ? parent.objectType : parent.value;
       const classDescriptor = this.classDescriptors.find(
         (c) => c.className === className
       );
-      console.assert(classDescriptor != null);
+      if (classDescriptor === undefined) {
+        const arrayValue = parent.value.map(
+            (v: any) => this.resolveAccess({
+              ...ast,
+              parent: v
+            }, env)
+        );
+        return {
+          type: "array",
+          value: arrayValue,
+          objectType: arrayValue[0].objectType
+        };
+      }
       const fieldDescriptor = Array.from(classDescriptor.fields).find(
         (f) => f.field === ast.access
       );
@@ -505,6 +521,7 @@ export class DslInterpreter {
     // find the function descriptor
     let funcDescriptor: FuncDescriptor;
     let isArray = false;
+    let isArrayElementFunction = false;
     if (env !== null) {
       switch (env.type) {
         case "class":
@@ -525,6 +542,14 @@ export class DslInterpreter {
           funcDescriptor = this.arrayFunctionDescriptors.find(
             (f) => f.func_name === ast.func_name
           );
+          if (funcDescriptor === undefined) {
+            const arrayValue = env.value.map((v) => this.resolveFunctionCall(ast, v));
+            return {
+                type: "array",
+                value: arrayValue,
+                objectType: arrayValue[0].objectType
+            }
+          }
           // if there is any element in the array, replace the descriptor with the correct type
           if (env.value.length > 0) {
             funcDescriptor = JSON.parse(JSON.stringify(funcDescriptor));

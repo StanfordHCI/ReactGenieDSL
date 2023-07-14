@@ -203,3 +203,25 @@ test("Order containing burger", () => {
     value: "McDonald's",
   });
 });
+
+test("Order array distribution field", () => {
+  Restaurant.all();
+  const interpreter = new DslInterpreter(allDescriptors);
+    const funcCallResult = interpreter.interpret(
+        'Order.all().dateTime[0].dayOfWeek'
+    );
+    expect(funcCallResult).toEqual({
+      "objectType": "string",
+      "type": "object",
+      "value": "Wednesday"
+    });
+});
+
+test("Order array distribution function", () => {
+    Restaurant.all();
+    const interpreter = new DslInterpreter(allDescriptors);
+    const funcCallResult = interpreter.interpret(
+        'Order.all().placeOrder()'
+    );
+    expect(funcCallResult["objectType"]).toEqual("void");
+});

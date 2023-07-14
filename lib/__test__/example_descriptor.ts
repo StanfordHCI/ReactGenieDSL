@@ -231,6 +231,7 @@ export class DateTime extends HelperClass {
       new FieldDescriptor("day", "int", false),
       new FieldDescriptor("hour", "int", false),
       new FieldDescriptor("minute", "int", false),
+      new FieldDescriptor("dayOfWeek", "string", false),
       new FieldDescriptor("sunday", "int", true),
       new FieldDescriptor("monday", "int", true),
       new FieldDescriptor("tuesday", "int", true),
