@@ -287,7 +287,10 @@ export class Food extends DataClass {
 
   static _ClassDescriptor = new ClassDescriptor<Food>(
     "Food",
-    [new FuncDescriptor("all", [], "Food[]", true, "All foods")],
+    [new FuncDescriptor("all", [], "Food[]", true, "All foods"),
+      new FuncDescriptor("All", [], "Food[]", true, "")
+    ],
+
     [
       new FieldDescriptor("name", "string", false),
       new FieldDescriptor("price", "float", false),
@@ -397,6 +400,8 @@ export class Order extends DataClass {
       new FuncDescriptor("placeOrder", [], "void", false, "Place the order"),
       new FuncDescriptor("current", [], "Order", true, "The current order"),
       new FuncDescriptor("all", [], "Order[]", true, "All past orders"),
+      new FuncDescriptor("All", [], "Order[]", true, ""),
+
     ],
     [
       new FieldDescriptor("orderId", "string", false),
@@ -627,6 +632,13 @@ export class Restaurant extends DataClass {
         "Restaurant[]",
         true,
         "All active restaurants"
+      ),
+      new FuncDescriptor(
+          "All",
+          [],
+          "Restaurant[]",
+          true,
+          "All active restaurants"
       ),
       new FuncDescriptor(
         "current",

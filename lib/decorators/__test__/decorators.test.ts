@@ -74,6 +74,8 @@ test("Restaurant Descriptor", async () => {
 });
 
 test("Food Descriptor", async () => {
+  console.log("Food descriptor", Food.ClassDescriptor);
+  console.log("Food descriptor", Food._ClassDescriptor);
   compareClassDescriptor(Food.ClassDescriptor, Food._ClassDescriptor);
   Food.all();
   const foodItem1 = Food.GetObject({ name: "Hamburger" });
@@ -89,7 +91,7 @@ test("Order Descriptor", async () => {
   Order.all();
   const order1 = Order.GetObject({ orderId: 1 });
   const order2 = Order.GetObject({ orderId: 1 });
-  order2.dateTime = new DateTime({
+  order2.dateTime = DateTime.CreateObject({
     year: 2023,
     month: 1,
     day: 1,
@@ -106,7 +108,7 @@ test("Order Descriptor", async () => {
       minute: 0,
     }).toString()
   );
-  order2.dateTime = new DateTime({
+  order2.dateTime =  DateTime.CreateObject({
     year: 2023,
     month: 1,
     day: 2,

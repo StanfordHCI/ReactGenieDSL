@@ -15,6 +15,12 @@ export const array_definition =
   "    \n" +
   "    // find items with field between two values in an array\n" +
   "    Array<Type> between(field: Field, from: Value, to: Value);\n" +
+  "    \n" +
+  "    // find items with field contains the value in an array\n" +
+  "    Array<Type> contains(field: Field, value: Value);\n" +
+  "    \n" +
+  "    // sort items according the field in an array\n" +
+  "    Array<Type> sort(field: Field, ascending: boolean);\n" +
   "}";
 
 export const class_separator = "\n\n";

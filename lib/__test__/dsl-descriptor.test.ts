@@ -13,6 +13,8 @@ test("Restaurant Description", async () => {
       "\tOrder[] orders;\n" +
       "\t// All active restaurants\n" +
       "\tstatic Restaurant[] all();\n" +
+      "\t// All active restaurants\n" +
+      "\tstatic Restaurant[] All();\n" +
       "\t// The current restaurant\n" +
       "\tstatic Restaurant current();\n" +
       "\t// Book a table for a given date time\n" +
