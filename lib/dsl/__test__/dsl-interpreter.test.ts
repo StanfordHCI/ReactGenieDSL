@@ -225,3 +225,16 @@ test("Order array distribution function", () => {
     );
     expect(funcCallResult["objectType"]).toEqual("void");
 });
+
+test("[dry run] Order containing burger", () => {
+  Restaurant.all();
+  const interpreter = new DslInterpreter(allDescriptors, true);
+  const funcCallResult = interpreter.interpret(
+    'Order.all().contains(field: .foods, value: Restaurant.current().menu.matching(field: .name, value: "hamburger")[0])[0].restaurant.name'
+  );
+  expect(funcCallResult).toEqual({
+    objectType: "string",
+    type: "object",
+    value: null,
+  });
+});

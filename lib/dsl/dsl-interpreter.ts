@@ -23,7 +23,7 @@ function parseType(value_type: string): {
 export class DslInterpreter {
   // region array functions
 
-  // better comparision functions
+  // TODO: better comparison functions
   private matching(value: any, template: any) {
     console.assert(typeof value === typeof template);
     if (typeof value === "string") {
@@ -432,7 +432,22 @@ export class DslInterpreter {
         ? this.strip(parent)[fieldDescriptor.field]
         : classDescriptor.classConstructor[fieldDescriptor.field];
       const fieldType = parseType(fieldDescriptor.fieldType);
+      let fieldValue;
+      if (this.dry_run) {
+        if (fieldType.is_array) {
+          fieldValue = [null];
+        } else {
+          fieldValue = null
+        }
+      } else {
+        if (isObject) {
+          fieldValue = this.strip(parent)[ast.access];
+        } else {
+          fieldValue = classDescriptor.classConstructor[ast.access];
+        }
+      }
       if (fieldType.is_array) {
+        // noinspection JSObjectNullOrUndefined
         return {
           type: "array",
           value: fieldValue.map((v) => {
@@ -588,11 +603,19 @@ export class DslInterpreter {
       const classDescriptor = this.classDescriptors.find(
         (c) => c.className === ast.func_name
       );
-      return {
-        type: "object",
-        value: new classDescriptor.classConstructor(matchedParameters),
-        objectType: ast.func_name,
-      };
+      if (this.dry_run) {
+        return {
+          type: "object",
+          value: null,
+          objectType: ast.func_name,
+        };
+      } else {
+        return {
+          type: "object",
+          value: new classDescriptor.classConstructor(matchedParameters),
+          objectType: ast.func_name,
+        };
+      }
     }
 
     const returnType = parseType(funcDescriptor.returnType);
@@ -603,24 +626,43 @@ export class DslInterpreter {
 
     // call the function
     if (returnType.is_array) {
-      return {
-        type: "array",
-        value: targetImplementation[ast.func_name](matchedParameters).map(
-          (v) => {
-            return {
-              type: "object",
-              value: v,
-              objectType: returnType.original_type,
-            };
-          }
-        ),
-      };
+      if (this.dry_run) {
+        return {
+          type: "array",
+          value: [{
+            type: "object",
+            value: null,
+            objectType: returnType.original_type,
+          }],
+        };
+      } else {
+        return {
+          type: "array",
+          value: targetImplementation[ast.func_name](matchedParameters).map(
+              (v) => {
+                return {
+                  type: "object",
+                  value: v,
+                  objectType: returnType.original_type,
+                };
+              }
+          ),
+        };
+      }
     } else {
-      return {
-        type: "object",
-        value: targetImplementation[ast.func_name](matchedParameters),
-        objectType: returnType.original_type,
-      };
+      if (this.dry_run) {
+        return {
+          type: "object",
+          value: null,
+          objectType: returnType.original_type,
+        };
+      } else {
+        return {
+          type: "object",
+          value: targetImplementation[ast.func_name](matchedParameters),
+          objectType: returnType.original_type,
+        };
+      }
     }
   }
 }
