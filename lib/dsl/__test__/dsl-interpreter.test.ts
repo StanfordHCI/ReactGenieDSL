@@ -132,16 +132,16 @@ test("best restaurant", () => {
 test("find cheap chinese restaurant", () => {
   const interpreter = new DslInterpreter(allDescriptors);
   const funcCallResult = interpreter.interpret(
-    'Restaurant.all().matching(field: .cuisine, value: "chinese").sort(field: .price, ascending: true)[0]'
+    'Restaurant.all().matching(field: .cuisine, value: "chinese").sort(field: .priceGrade, ascending: true)[0]'
   );
   expect(interpreter.describe(funcCallResult)).toEqual({
     type: "object",
     value: {
       address: "123 Main St, Palo Alto, USA",
       cuisine: "Chinese",
-      name: "Taste",
-      priceGrade: 3,
-      rating: 5,
+      name: "Steam",
+      priceGrade: 2,
+      rating: 4,
     },
   });
 });

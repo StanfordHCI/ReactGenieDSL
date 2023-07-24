@@ -33,7 +33,7 @@ test('Intermediate function', async () => {
     process.env.OPENAI_API_BASE_URL
   );
   const user_utterance = 'get me the cheapest restaurant in palo alto';
-  const parsed = await interpreter.nlParser.parse(user_utterance);
+  const parsed = await interpreter.nlParser.parseGpt4(user_utterance);
   const funcCallResult = await interpreter.dslInterpreter.interpret(parsed);
   const resultString = JSON.stringify(funcCallResult.value.description());
   const response = await interpreter.nlParser.respond(
