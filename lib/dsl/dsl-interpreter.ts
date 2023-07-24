@@ -20,6 +20,39 @@ function parseType(value_type: string): {
   }
 }
 
+class InterpreterError extends Error {
+}
+
+class ClassMissingError extends InterpreterError {
+  constructor(public class_name: string) {
+    super(`Class ${class_name} is missing`);
+  }
+}
+
+class FieldMissingError extends InterpreterError {
+  constructor(public class_name: string, public field_name: string) {
+    super(`Field ${class_name}.${field_name} is missing`);
+  }
+}
+
+class FieldStaticError extends InterpreterError {
+    constructor(public class_name: string, public field_name: string) {
+        super(`Field ${class_name}.${field_name} should be static`);
+    }
+}
+
+class FunctionMissingError extends InterpreterError {
+  constructor(public class_name: string, public func_name: string) {
+    super(`Function ${class_name}.${func_name} is missing`);
+  }
+}
+
+class FunctionStaticError extends InterpreterError {
+  constructor(public class_name: string, public func_name: string) {
+    super(`Function ${class_name}.${func_name} should be static`);
+  }
+}
+
 export class DslInterpreter {
   // region array functions
 
@@ -268,7 +301,7 @@ export class DslInterpreter {
   resolveSteps: any[] = [];
   resolveStepsEnabled: boolean = false;
 
-  constructor(public classDescriptors: ClassDescriptor<GenieObject>[]) {}
+  constructor(public classDescriptors: ClassDescriptor<GenieObject>[], public dry_run = false) {}
 
   /**
    * interpret a DSL expression
@@ -410,27 +443,32 @@ export class DslInterpreter {
         (c) => c.className === className
       );
       if (classDescriptor === undefined) {
-        const arrayValue = parent.value.map(
-            (v: any) => this.resolveAccess({
-              ...ast,
-              parent: v
-            }, env)
-        );
-        return {
-          type: "array",
-          value: arrayValue,
-          objectType: arrayValue[0].objectType
-        };
+        if (parent.type == "array") {
+          const arrayValue = parent.value.map(
+              (v: any) => this.resolveAccess({
+                ...ast,
+                parent: v
+              }, env)
+          );
+          return {
+            type: "array",
+            value: arrayValue,
+            objectType: arrayValue[0].objectType
+          };
+        } else {
+          throw new ClassMissingError(className);
+        }
       }
       const fieldDescriptor = Array.from(classDescriptor.fields).find(
         (f) => f.field === ast.access
       );
+      if (fieldDescriptor === undefined) {
+        throw new FieldMissingError(className, ast.access);
+      }
       // we can only access if the field is static or the parent is an object
-      // TODO: print error message
-      console.assert(isObject || fieldDescriptor.isStatic);
-      const fieldValue = isObject
-        ? this.strip(parent)[fieldDescriptor.field]
-        : classDescriptor.classConstructor[fieldDescriptor.field];
+      if (!isObject && !fieldDescriptor.isStatic) {
+        throw new FieldStaticError(className, ast.access);
+      }
       const fieldType = parseType(fieldDescriptor.fieldType);
       let fieldValue;
       if (this.dry_run) {
@@ -534,23 +572,38 @@ export class DslInterpreter {
           )
         : new Map([]);
     // find the function descriptor
+    let classDescriptor: ClassDescriptor<GenieObject>;
     let funcDescriptor: FuncDescriptor;
     let isArray = false;
     let isArrayElementFunction = false;
     if (env !== null) {
       switch (env.type) {
         case "class":
+          classDescriptor =
+              this.classDescriptors.find((c) => c.className === env.value);
+          if (classDescriptor === undefined) {
+            throw new ClassMissingError(env.value);
+          }
           funcDescriptor = Array.from(
-            this.classDescriptors.find((c) => c.className === env.value)
-              .functions
+            classDescriptor.functions
           ).find((f) => f.func_name === ast.func_name);
-          console.assert(funcDescriptor.isStatic);
+          if (funcDescriptor === undefined) {
+            throw new FunctionMissingError(env.value, ast.func_name);
+          } else if (!funcDescriptor.isStatic) {
+            throw new FunctionStaticError(env.value, ast.func_name);
+          }
           break;
         case "object":
+          classDescriptor = this.classDescriptors.find((c) => c.className === env.objectType);
+          if (classDescriptor === undefined) {
+            throw new ClassMissingError(env.objectType);
+          }
           funcDescriptor = Array.from(
-            this.classDescriptors.find((c) => c.className === env.objectType)
-              .functions
+            classDescriptor.functions
           ).find((f) => f.func_name === ast.func_name);
+          if (funcDescriptor === undefined) {
+            throw new FunctionMissingError(env.objectType, ast.func_name);
+          }
           break;
         // deal with array functions (`matching`, `between`, `equals`)
         case "array":
@@ -623,6 +676,24 @@ export class DslInterpreter {
     const targetImplementation = isArray
       ? this.arrayFunctionImplementations
       : this.strip(env);
+
+    if (isArray) {
+      console.log("isArray", ast.func_name, matchedParameters, targetImplementation)
+      if (ast.func_name != "index") {
+        const classDescriptor = this.classDescriptors.find(
+          (c) => c.className === env.value[0].objectType
+        );
+        if (classDescriptor === undefined) {
+          throw new ClassMissingError(env.value[0].objectType)
+        }
+        const fieldDescriptor = Array.from(classDescriptor.fields).find(
+            (f) => f.field === matchedParameters["field"].field
+        );
+        if (fieldDescriptor === undefined) {
+          throw new FieldMissingError(env.value[0].objectType, matchedParameters["field"].field)
+        }
+      }
+    }
 
     // call the function
     if (returnType.is_array) {

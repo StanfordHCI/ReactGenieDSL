@@ -238,3 +238,55 @@ test("[dry run] Order containing burger", () => {
     value: null,
   });
 });
+
+test("[dry run][error] Restaurant noise level", () => {
+  Restaurant.all();
+  const interpreter = new DslInterpreter(allDescriptors, true);
+  try {
+    const funcCallResult = interpreter.interpret(
+        'Restaurant.All().matching(field: .noiseLevel, value: "quiet")'
+    );
+  } catch (e) {
+      expect(e.message).toEqual("Field Restaurant.noiseLevel is missing");
+  }
+});
+
+test("[dry run][error] Restaurant noise level 2", () => {
+  Restaurant.all();
+  const interpreter = new DslInterpreter(allDescriptors, true);
+  try {
+    const funcCallResult = interpreter.interpret(
+        'Restaurant.All()[0].noiseLevel'
+    );
+  } catch (e) {
+      expect(e.message).toEqual("Field Restaurant.noiseLevel is missing");
+  }
+});
+
+test("[dry run][error] Restaurant notify when near", () => {
+  Restaurant.all();
+  const interpreter = new DslInterpreter(allDescriptors, true);
+  try {
+    const funcCallResult = interpreter.interpret(
+        'Order.current().notifyWhenNearLocation()'
+    );
+  } catch (e) {
+      expect(e.message).toEqual("Function Order.notifyWhenNearLocation is missing");
+  }
+});
+
+test("[dry run][error] Login", () => {
+  Restaurant.all();
+  const interpreter = new DslInterpreter(allDescriptors, true);
+  try {
+    const funcCallResult = interpreter.interpret(
+        'User.login()'
+    );
+  } catch (e) {
+      expect(e.message).toEqual("Class User is missing");
+  }
+});
+
+
+
+
