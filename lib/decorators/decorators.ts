@@ -305,7 +305,7 @@ export function GenieClass(comment: string) {
           );
         }
         // check if keyField exists
-        if (!obj[keyField]) {
+        if (obj[keyField]=== null || obj[keyField]=== undefined) {
           throw new Error(
             "keyField " +
               keyField +
