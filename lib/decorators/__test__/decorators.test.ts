@@ -4,7 +4,7 @@ import {
   ClassDescriptor,
   FieldDescriptor,
   FuncDescriptor,
-  DataClass, HelperClass,
+  DataClass, HelperClass, GenieObject
 } from "../../dsl-descriptor";
 import {GenieClass, GenieKey, GenieProperty, initGenie} from "../decorators";
 import {
@@ -41,8 +41,8 @@ function sortDescriptor(a: { name: string }, b: { name: string }) {
 }
 
 function compareClassDescriptor(
-  a: ClassDescriptor<DataClass>,
-  b: ClassDescriptor<DataClass>
+  a: ClassDescriptor<GenieObject>,
+  b: ClassDescriptor<GenieObject>
 ) {
   assert.equal(a.className, b.className);
   assert.equal(a.classConstructor, b.classConstructor);
@@ -166,10 +166,10 @@ class TodoList extends DataClass {
 
 test("Change TodoList", async () => {
   genieDispatch(() => {
-    var grocieriesList = TodoList.GetObject({name: "Groceries"})
-    var item = grocieriesList.items[0];
+    const groceriesList = TodoList.GetObject({ name: "Groceries" });
+    const item = groceriesList.items[0];
     item.done = true;
-    var grocieriesListItems = grocieriesList.items;
-    grocieriesListItems.push(TodoListItem.CreateObject({name: "Butter", done: false}));
+    const groceriesListItems = groceriesList.items;
+    groceriesListItems.push(TodoListItem.CreateObject({name: "Butter", done: false}));
   });
 });

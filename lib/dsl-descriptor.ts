@@ -40,6 +40,8 @@ export class GenieObject {
   }
 
   static Examples: ExampleParse[] = [];
+
+  static ClassDescriptor: ClassDescriptor<GenieObject>;
 }
 
 /**
@@ -90,8 +92,6 @@ export class DataClass extends GenieObject {
       "Not implemented. Did you forget to decorate the class with @GenieClass?"
     );
   }
-
-  static ClassDescriptor: ClassDescriptor<DataClass>;
 }
 
 export type HelperClassGetter = () => {};
