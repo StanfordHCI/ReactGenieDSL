@@ -678,7 +678,6 @@ export class DslInterpreter {
       : this.strip(env);
 
     if (isArray) {
-      console.log("isArray", ast.func_name, matchedParameters, targetImplementation)
       if (ast.func_name != "index") {
         const classDescriptor = this.classDescriptors.find(
           (c) => c.className === env.value[0].objectType
