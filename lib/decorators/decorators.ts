@@ -272,7 +272,7 @@ export function GenieClass(comment: string) {
           path: (string | number)[]
         ): HelperClassGetterSetter {
           return [
-            () => getJsonByPath(sharedState[target.name][obj[keyField]], path),
+            () => genieDispatch(()=>getJsonByPath(sharedState[target.name][obj[keyField]], path)),
             (value) => {
               genieDispatch(() => {
                 setSharedState({
@@ -394,12 +394,14 @@ export function GenieClass(comment: string) {
           path: (string | number)[]
         ): HelperClassGetterSetter {
           return [
-            () => {
+            () => 
+              genieDispatch(() => {
               if (obj.localStoreGetterSetter != null) {
                 obj.localStore = obj.localStoreGetterSetter[0]();
               }
               return getJsonByPath(obj.localStore, path);
-            },
+              })
+            ,
             (value) => {
               genieDispatch(() => {
                 if (obj.localStoreGetterSetter != null) {
