@@ -1,3 +1,5 @@
+import { ExampleParse } from "./nl";
+
 let constructorInCreateObject = false;
 
 export class GenieObject {
@@ -32,6 +34,12 @@ export class GenieObject {
 
   // placeholder, other code that should run after initGenie
   static setup() {}
+
+  description(): {} {
+    return this;
+  }
+
+  static Examples: ExampleParse[] = [];
 }
 
 /**
@@ -81,10 +89,6 @@ export class DataClass extends GenieObject {
     throw new Error(
       "Not implemented. Did you forget to decorate the class with @GenieClass?"
     );
-  }
-
-  description(): {} {
-    return this;
   }
 
   static ClassDescriptor: ClassDescriptor<DataClass>;
