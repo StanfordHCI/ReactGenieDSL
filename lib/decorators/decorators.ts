@@ -272,19 +272,22 @@ export function GenieClass(comment: string) {
           path: (string | number)[]
         ): HelperClassGetterSetter {
           return [
-            () => genieDispatch(()=>getJsonByPath(sharedState[target.name][obj[keyField]], path)),
+            () => getJsonByPath(sharedState["OBJECT"][target.name][obj[keyField]], path),
             (value) => {
               genieDispatch(() => {
                 setSharedState({
                   ...sharedState,
-                  [target.name]: {
-                    ...sharedState[target.name],
-                    [obj[keyField]]: setJsonByPath(
-                      sharedState[target.name][obj[keyField]],
-                      path,
-                      value
-                    ),
-                  },
+                  ["OBJECT"]: {
+                    ...sharedState["OBJECT"],
+                    [target.name]: {
+                      ...sharedState["OBJECT"][target.name],
+                      [obj[keyField]]: setJsonByPath(
+                        sharedState["OBJECT"][target.name][obj[keyField]],
+                        path,
+                        value
+                      ),
+                    },
+                  }
                 });
               });
             },
@@ -319,9 +322,9 @@ export function GenieClass(comment: string) {
         // save data to store
         genieDispatch(() => {
           let objectState = {};
-          if (sharedState[target.name]) {
+          if (sharedState["OBJECT"][target.name]) {
             objectState = {
-              ...sharedState[target.name],
+              ...sharedState["OBJECT"][target.name],
             };
           }
           // overwrite existing object
@@ -338,7 +341,10 @@ export function GenieClass(comment: string) {
           });
           setSharedState({
             ...sharedState,
-            [target.name]: objectState,
+            ["OBJECT"]: {
+              ...sharedState["OBJECT"],
+              [target.name]: objectState,
+            }
           });
         });
         // replace fields with getters and setters
@@ -348,20 +354,23 @@ export function GenieClass(comment: string) {
           }
           Object.defineProperty(obj, field, {
             get: function () {
-              let value = sharedState[target.name][obj[keyField]][field];
+              let value = sharedState["OBJECT"][target.name][obj[keyField]][field];
               return deserializeField(generateGetterSetter)(value, [field]);
             },
             set: function (value) {
               genieDispatch(() => {
                 setSharedState({
                   ...sharedState,
-                  [target.name]: {
-                    ...sharedState[target.name],
-                    [obj[keyField]]: {
-                      ...sharedState[target.name][obj[keyField]],
-                      [field]: serializeField(generateGetterSetter)(value, [
-                        field,
-                      ]),
+                  ["OBJECT"]: {
+                    ...sharedState["OBJECT"],
+                    [target.name]: {
+                      ...sharedState["OBJECT"][target.name],
+                      [obj[keyField]]: {
+                        ...sharedState["OBJECT"][target.name][obj[keyField]],
+                        [field]: serializeField(generateGetterSetter)(value, [
+                          field,
+                        ]),
+                      },
                     },
                   },
                 });
@@ -373,6 +382,12 @@ export function GenieClass(comment: string) {
           objects[target.name] = {};
         }
         objects[target.name][obj[keyField]] = obj;
+        obj.__getState = function () {
+          return {
+            "object": sharedState["OBJECT"][target.name][obj[keyField]],
+            "class": sharedState["CLASS"][target.name]
+          }
+        }
         return obj;
       };
 
@@ -383,7 +398,7 @@ export function GenieClass(comment: string) {
 
       target.DeleteObject = function (key: {}) {
         let obj = objects[target.name][key[target.prototype.genieKey]];
-        delete objects[target.name][key[target.prototype.genieKey]];
+        obj.__deleted = true;
         return obj;
       }
     } else if (target.prototype instanceof HelperClass) {
@@ -478,6 +493,9 @@ export function GenieClass(comment: string) {
       function All() {
         let allObjects = [];
         for (let key in objects[target.name]) {
+          if (objects[target.name][key].__deleted) {
+            continue;
+          }
           allObjects.push(objects[target.name][key]);
         }
         return allObjects;

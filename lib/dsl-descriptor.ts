@@ -42,6 +42,12 @@ export class GenieObject {
   static Examples: ExampleParse[] = [];
 
   static ClassDescriptor: ClassDescriptor<GenieObject>;
+
+  public __deleted = false;
+
+  __getState(): {} {
+    return {};
+  }
 }
 
 /**

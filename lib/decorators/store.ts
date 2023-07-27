@@ -19,7 +19,7 @@ export function setSharedState(state: {}) {
 }
 
 export function storeReducer(
-  state: {} = {},
+  state: {} = {"CLASS": {}, "OBJECT": {}},
   action: { type: string; payload: any }
 ) {
   if (action.type === "genieAction") {
