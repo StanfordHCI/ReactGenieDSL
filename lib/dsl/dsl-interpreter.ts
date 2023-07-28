@@ -20,34 +20,34 @@ function parseType(value_type: string): {
   }
 }
 
-class InterpreterError extends Error {
+export class InterpreterError extends Error {
 }
 
-class ClassMissingError extends InterpreterError {
+export class ClassMissingError extends InterpreterError {
   constructor(public class_name: string) {
     super(`Class ${class_name} is missing`);
   }
 }
 
-class FieldMissingError extends InterpreterError {
+export class FieldMissingError extends InterpreterError {
   constructor(public class_name: string, public field_name: string) {
     super(`Field ${class_name}.${field_name} is missing`);
   }
 }
 
-class FieldStaticError extends InterpreterError {
+export class FieldStaticError extends InterpreterError {
     constructor(public class_name: string, public field_name: string) {
         super(`Field ${class_name}.${field_name} should be static`);
     }
 }
 
-class FunctionMissingError extends InterpreterError {
+export class FunctionMissingError extends InterpreterError {
   constructor(public class_name: string, public func_name: string) {
     super(`Function ${class_name}.${func_name} is missing`);
   }
 }
 
-class FunctionStaticError extends InterpreterError {
+export class FunctionStaticError extends InterpreterError {
   constructor(public class_name: string, public func_name: string) {
     super(`Function ${class_name}.${func_name} should be static`);
   }
