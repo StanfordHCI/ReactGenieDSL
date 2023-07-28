@@ -397,9 +397,11 @@ export function GenieClass(comment: string) {
       };
 
       target.DeleteObject = function (key: {}) {
+        genieDispatch(() => {
         let obj = objects[target.name][key[target.prototype.genieKey]];
         obj.__deleted = true;
         return obj;
+        })
       }
     } else if (target.prototype instanceof HelperClass) {
       target._createObject = function (...args: any[]){
