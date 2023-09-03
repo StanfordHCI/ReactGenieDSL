@@ -251,7 +251,7 @@ const deserializeField =
 
 export function GenieClass(comment: string) {
   return function (target: any) {
-    console.debug("GenieClass decorator called on " + target.name);
+    // console.debug("GenieClass decorator called on " + target.name);
 
     target.prototype.comment = comment;
     if (!target.ClassDescriptor) {
@@ -559,12 +559,12 @@ function classToName(object: any): string {
 export function GenieFunction(comment: string = "") {
   return function (target: any, propertyKey: string) {
     if (!target.ClassDescriptor) {
-      console.debug(
-        "GenieFunction decorator called on " +
-          target.constructor.name +
-          "." +
-          propertyKey
-      );
+      // console.debug(
+      //   "GenieFunction decorator called on " +
+      //     target.constructor.name +
+      //     "." +
+      //     propertyKey
+      // );
       const paramTypes = Reflect.getMetadata(
         "design:paramtypes",
         target,
@@ -630,7 +630,7 @@ export function GenieFunction(comment: string = "") {
       if (!targetClass.__class_descriptor_functions) {
         targetClass.__class_descriptor_functions = [];
       }
-      console.debug(`pushing function descriptor ${funcDescriptor}`);
+      // console.debug(`pushing function descriptor ${funcDescriptor}`);
       targetClass.__class_descriptor_functions.push(funcDescriptor);
       if (genieFunctionModifier) {
         genieFunctionModifier(target, propertyKey, isStatic);
@@ -640,23 +640,23 @@ export function GenieFunction(comment: string = "") {
 }
 
 export function GenieKey(target: any, propertyKey: string) {
-  console.debug(
-    "GenieKey decorator called on " +
-      target.constructor.name +
-      "." +
-      propertyKey
-  );
+  // console.debug(
+  //   "GenieKey decorator called on " +
+  //     target.constructor.name +
+  //     "." +
+  //     propertyKey
+  // );
   target.genieKey = propertyKey;
 }
 
 export function GenieProperty(comment: string = "") {
   return function (target: any, propertyKey: string) {
-    console.debug(
-      "GenieProperty decorator called on " +
-        target.constructor.name +
-        "." +
-        propertyKey
-    );
+    // console.debug(
+    //   "GenieProperty decorator called on " +
+    //     target.constructor.name +
+    //     "." +
+    //     propertyKey
+    // );
     const typeObj = Reflect.getMetadata("design:type", target, propertyKey);
     const isStaticMeta = Reflect.getMetadata(
       "design:is_static",
@@ -676,7 +676,7 @@ export function GenieProperty(comment: string = "") {
       isStatic,
       comment
     );
-    console.debug(`pushing property descriptor: ${propertyDescriptor}`);
+    // console.debug(`pushing property descriptor: ${propertyDescriptor}`);
     targetClass.__class_descriptor_properties.push(propertyDescriptor);
     if (geniePropertyModifier) {
       geniePropertyModifier(target, propertyKey, isStatic);
