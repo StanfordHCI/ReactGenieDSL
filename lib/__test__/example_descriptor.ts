@@ -599,6 +599,9 @@ export class Restaurant extends DataClass {
   @GenieProperty("Address of the restaurant")
   public address: string;
 
+  @GenieProperty()
+  public menus: string[];
+
   constructor({
     name,
     menu,

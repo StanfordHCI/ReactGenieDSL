@@ -288,5 +288,19 @@ test("[dry run][error] Login", () => {
 });
 
 
+test("[dry run][error] String", () => {
+  Restaurant.all();
+  const interpreter = new DslInterpreter(allDescriptors, true);
+  try {
+    const funcCallResult = interpreter.interpret(
+      'Restaurant.current().menus.sort(field: .rating, ascending: false)'
+    );
+  } catch (e) {
+    console.log(e)
+    expect(e.message).toEqual("Field String.rating is missing");
+  }
+});
+
+
 
 

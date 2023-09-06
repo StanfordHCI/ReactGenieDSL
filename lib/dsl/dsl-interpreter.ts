@@ -301,7 +301,16 @@ export class DslInterpreter {
   resolveSteps: any[] = [];
   resolveStepsEnabled: boolean = false;
 
-  constructor(public classDescriptors: ClassDescriptor<GenieObject>[], public dry_run = false) {}
+
+
+  constructor(public classDescriptors: ClassDescriptor<GenieObject>[], public dry_run = false) {
+    this.classDescriptors.push(new ClassDescriptor("String", [], [], null,));
+    this.classDescriptors.push(new ClassDescriptor("Number", [], [], null,));
+    this.classDescriptors.push(new ClassDescriptor("float", [], [], null,));
+    this.classDescriptors.push(new ClassDescriptor("int", [], [], null,));
+    this.classDescriptors.push(new ClassDescriptor("Boolean", [], [], null,));
+    // console.log(this.classDescriptors);
+  }
 
   /**
    * interpret a DSL expression
@@ -455,7 +464,8 @@ export class DslInterpreter {
             value: arrayValue,
             objectType: arrayValue[0].objectType
           };
-        } else {
+        }
+        else {
           throw new ClassMissingError(className);
         }
       }
