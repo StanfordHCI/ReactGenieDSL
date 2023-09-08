@@ -293,7 +293,7 @@ test("[dry run][error] String", () => {
   const interpreter = new DslInterpreter(allDescriptors, true);
   try {
     const funcCallResult = interpreter.interpret(
-      'Restaurant.current().menus.sort(field: .rating, ascending: false)'
+      'Restaurant.All().matching(field: .location, value: "near me")'
     );
   } catch (e) {
     console.log(e)
