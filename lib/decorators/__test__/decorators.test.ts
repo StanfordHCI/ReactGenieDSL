@@ -77,6 +77,7 @@ test("Food Descriptor", async () => {
   console.log("Food descriptor", Food.ClassDescriptor);
   console.log("Food descriptor", Food._ClassDescriptor);
   compareClassDescriptor(Food.ClassDescriptor, Food._ClassDescriptor);
+  Restaurant.all();
   Food.all();
   const foodItem1 = Food.GetObject({ name: "Hamburger" });
   const foodItem2 = Food.GetObject({ name: "Hamburger" });
@@ -88,6 +89,7 @@ test("Food Descriptor", async () => {
 
 test("Order Descriptor", async () => {
   compareClassDescriptor(Order.ClassDescriptor, Order._ClassDescriptor);
+  Restaurant.all();
   Order.all();
   const order1 = Order.GetObject({ orderId: 1 });
   const order2 = Order.GetObject({ orderId: 1 });

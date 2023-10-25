@@ -4,7 +4,7 @@ test("parse", () => {
   const result = parse(
     "Order.past_orders.between(field:.order_date,from:Date.today.add_date(day:-7).day_of_the_same_week(new_day_of_the_week:Day.Monday),to:Date.today.add_date(day:-7).day_of_the_same_week(new_day_of_the_week:Day.Sunday))[0].foods[0]",
     {}
-  );
+  )[0];
   expect(result).toEqual({
     type: "index",
     parent: {
@@ -96,7 +96,7 @@ test("parse", () => {
 
   const result2 = parse(
     'Restaurant.default.matching(field: .name, value: "Panda Express")[0].remove_favorite_restaurant()'
-  );
+  )[0];
   expect(result2).toEqual({
     type: "access",
     parent: {
@@ -127,7 +127,7 @@ test("parse", () => {
 
   const result3 = parse(
     'Current.order.add_to_order(foods: [Current.food.matching(field: .name, value: "hamburger")])'
-  );
+  )[0];
   expect(result3).toEqual({
     type: "access",
     parent: { type: "access", parent: "Current", access: "order" },
@@ -167,7 +167,7 @@ test("parse", () => {
 
   const result4 = parse(
     'Order.current.add_to_order(foods: [Restaurant.all.matching(field: .name, value: "mcDonalds")[0].get_menu().matching(field: .name, value: "coke")[0]])'
-  );
+  )[0];
   expect(result4).toEqual({
     type: "access",
     parent: { type: "access", parent: "Order", access: "current" },
@@ -243,7 +243,7 @@ test("parse", () => {
   });
   const result5 = parse(
     "Order.all().sort(field: .date, ascending: true)[0].restaurant.name"
-  );
+  )[0];
   expect(result5).toEqual({
     access: "name",
     parent: {

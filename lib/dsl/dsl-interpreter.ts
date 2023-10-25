@@ -315,19 +315,19 @@ export class DslInterpreter {
   /**
    * interpret a DSL expression
    **/
-  public interpret(input: string): any {
+  public async interpret(input: string): Promise<any> {
     const ast = parse(input)[0];
     // console.log(JSON.stringify(ast));
     // ast = {"type":"access","parent":{"type":"access","parent":"Restaurant","access":{"type":"function_call","func_name":"current","parameters":null}},"access":{"type":"function_call","func_name":"book","parameters":[{"parameter":"dateTime","value":{"type":"function_call","func_name":"DateTime","parameters":[{"parameter":"year","value":{"type":"int","value":2020}},{"parameter":"month","value":{"type":"int","value":1}},{"parameter":"day","value":{"type":"int","value":1}},{"parameter":"hour","value":{"type":"int","value":12}},{"parameter":"minute","value":{"type":"int","value":0}}]}}]}}
-    return this.resolve(ast);
+    return await this.resolve(ast);
   }
 
-  public interpretSteps(input: string): any[] {
-    const ast = parse(input);
+  public async interpretSteps(input: string): Promise<any[]> {
+    const ast = parse(input)[0];
     // console.log(JSON.stringify(ast));
     this.resolveSteps = [];
     this.resolveStepsEnabled = true;
-    this.resolve(ast);
+    await this.resolve(ast);
     this.resolveStepsEnabled = false;
     return this.resolveSteps;
   }
@@ -336,12 +336,13 @@ export class DslInterpreter {
    * Generate a description of the current ast
    * @param ast
    */
-  public describe(ast: any) {
+  public async describe(ast: any) {
     switch (ast.type) {
       case "array":
         return {
           type: "array",
-          elements: ast.value.map((e) => this.describe(e)),
+          elements: await Promise.all(
+            ast.value.map(async (e) => await this.describe(e))),
         };
       case "string":
       case "int":
@@ -356,7 +357,7 @@ export class DslInterpreter {
               value: ast.value,
             };
           } else {
-            return { type: "object", value: ast.value.description() };
+            return { type: "object", value: await ast.value.description() };
           }
         } else {
           console.assert(ast.objectType == "void");
@@ -365,8 +366,8 @@ export class DslInterpreter {
     }
   }
 
-  public describeSteps(list: any[]) {
-    return list.map((e) => this.describe(e.result));
+  public async describeSteps(list: any[]) {
+    return await Promise.all(list.map((e) => this.describe(e.result)));
   }
 
   /**
@@ -397,20 +398,20 @@ export class DslInterpreter {
    * @param ast the ast node to resolve
    * @param env the environment in which to resolve the node
    */
-  public resolve(ast: any, env: null | any = null): any {
+  public async resolve(ast: any, env: null | any = null): Promise<any> {
     let result = null;
     switch (ast.type) {
       case "access":
-        result = this.resolveAccess(ast, env);
+        result = await this.resolveAccess(ast, env);
         break;
       case "index":
-        result = this.resolveIndex(ast, env);
+        result = await this.resolveIndex(ast, env);
         break;
       case "function_call":
-        result = this.resolveFunctionCall(ast, env);
+        result = await this.resolveFunctionCall(ast, env);
         break;
       case "array":
-        result = this.resolveArray(ast, env);
+        result = await this.resolveArray(ast, env);
         break;
 
       // don't do anything for primitive types
@@ -435,7 +436,7 @@ export class DslInterpreter {
    * @param env the environment in which to resolve the node
    * @private
    */
-  private resolveAccess(ast: any, env: any) {
+  private async resolveAccess(ast: any, env: any) {
     console.assert(env == null);
     let parent;
     if (typeof ast.parent === "string") {
@@ -443,7 +444,7 @@ export class DslInterpreter {
     } else if (ast.parent.type === "object") {
       parent = ast.parent;
     } else {
-      parent = this.resolve(ast.parent, null);
+      parent = await this.resolve(ast.parent, null);
     }
     if (typeof ast.access === "string") {
       const isObject = parent.type === "object";
@@ -453,12 +454,12 @@ export class DslInterpreter {
       );
       if (classDescriptor === undefined) {
         if (parent.type == "array") {
-          const arrayValue = parent.value.map(
+          const arrayValue = await Promise.all(parent.value.map(
               (v: any) => this.resolveAccess({
                 ...ast,
                 parent: v
               }, env)
-          );
+          ));
           return {
             type: "array",
             value: arrayValue,
@@ -514,7 +515,7 @@ export class DslInterpreter {
         };
       }
     } else {
-      return this.resolve(ast.access, parent);
+      return await this.resolve(ast.access, parent);
     }
   }
 
@@ -524,7 +525,7 @@ export class DslInterpreter {
    * @param env the environment in which to resolve the node
    * @private
    */
-  private resolveIndex(ast: any, env: any) {
+  private async resolveIndex(ast: any, env: any) {
     console.assert(env == null);
     let indexParam;
     if (typeof ast.index === "number") {
@@ -532,7 +533,7 @@ export class DslInterpreter {
     } else {
       indexParam = ast.index;
     }
-    return this.resolve(
+    return await this.resolve(
       {
         type: "access",
         parent: ast.parent,
@@ -552,9 +553,9 @@ export class DslInterpreter {
    * @param env the environment in which to resolve the node
    * @private
    */
-  private resolveArray(ast: any, env: any) {
+  private async resolveArray(ast: any, env: any) {
     console.assert(env == null);
-    const values = ast.value.map((v) => this.resolve(v, null));
+    const values = await Promise.all(ast.value.map((v) => this.resolve(v, null)));
     // make sure all the elements are objects
     console.assert(values.every((v) => v.type === "object"));
     // make sure all the elements have the same type
@@ -571,15 +572,15 @@ export class DslInterpreter {
    * @param env the environment in which to resolve the node
    * @private
    */
-  private resolveFunctionCall(ast: any, env: any) {
+  private async resolveFunctionCall(ast: any, env: any) {
     const parameters =
       ast.parameters !== null
-        ? new Map(
-            ast.parameters.map((p) => [
+        ? new Map(await Promise.all(
+            ast.parameters.map(async (p) => [
               p.parameter,
-              this.resolve(p.value, null),
+              await this.resolve(p.value, null),
             ])
-          )
+          ))
         : new Map([]);
     // find the function descriptor
     let classDescriptor: ClassDescriptor<GenieObject>;
@@ -621,7 +622,7 @@ export class DslInterpreter {
             (f) => f.func_name === ast.func_name
           );
           if (funcDescriptor === undefined) {
-            const arrayValue = env.value.map((v) => this.resolveFunctionCall(ast, v));
+            const arrayValue = await Promise.all(env.value.map((v) => this.resolveFunctionCall(ast, v)));
             return {
                 type: "array",
                 value: arrayValue,
@@ -718,7 +719,7 @@ export class DslInterpreter {
       } else {
         return {
           type: "array",
-          value: targetImplementation[ast.func_name](matchedParameters).map(
+          value: (await targetImplementation[ast.func_name](matchedParameters)).map(
               (v) => {
                 return {
                   type: "object",
@@ -739,7 +740,7 @@ export class DslInterpreter {
       } else {
         return {
           type: "object",
-          value: targetImplementation[ast.func_name](matchedParameters),
+          value: await(targetImplementation[ast.func_name](matchedParameters)),
           objectType: returnType.original_type,
         };
       }

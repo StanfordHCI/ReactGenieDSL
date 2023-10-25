@@ -563,7 +563,7 @@ export class Restaurant extends DataClass {
     return food;
   }
 
-  createOrder(orderId: string, dateTime: DateTime, foods: Food[]) {
+  async createOrder(orderId: string, dateTime: DateTime, foods: Food[]) {
     const order = Order.CreateObject({
       orderId,
       dateTime,
@@ -571,7 +571,11 @@ export class Restaurant extends DataClass {
       restaurant: this,
     });
     this.orders.push(order);
-    return order;
+    return new Promise<Order>((resolve) => {
+      setTimeout(() => {
+        resolve(order);
+      }, 10);
+    });
   }
 
   @GenieFunction("Get the current restaurant")
@@ -598,9 +602,6 @@ export class Restaurant extends DataClass {
   public cuisine: string;
   @GenieProperty("Address of the restaurant")
   public address: string;
-
-  @GenieProperty()
-  public menus: string[];
 
   constructor({
     name,

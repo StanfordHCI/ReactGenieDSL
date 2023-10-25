@@ -36,7 +36,7 @@ export class NlInterpreter {
     if (command === null) {
       return null;
     }
-    return this.dslInterpreter.interpret(command);
+    return await this.dslInterpreter.interpret(command);
   }
 
   async respond(

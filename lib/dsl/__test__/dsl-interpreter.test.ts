@@ -7,9 +7,9 @@ import {
 import { initGenie } from "../../decorators";
 initGenie();
 
-test("Basic function call", () => {
+test("Basic function call", async () => {
   const interpreter = new DslInterpreter(allDescriptors);
-  const funcCallResult = interpreter.interpret(
+  const funcCallResult = await interpreter.interpret(
     "Restaurant.current().book(dateTime: DateTime(year: 2020, month: 1, day: 1, hour: 12, minute: 0))"
   );
   expect(recentBooking).toEqual("McDonald's is booking for 2020-1-1 12:0");
@@ -20,9 +20,9 @@ test("Basic function call", () => {
   });
 });
 
-test("Indexing", () => {
+test("Indexing", async () => {
   const interpreter = new DslInterpreter(allDescriptors);
-  const funcCallResult = interpreter.interpret("Restaurant.all()[1].name");
+  const funcCallResult = await interpreter.interpret("Restaurant.all()[1].name");
   expect(funcCallResult).toEqual({
     objectType: "string",
     type: "object",
@@ -30,9 +30,9 @@ test("Indexing", () => {
   });
 });
 
-test("Array", () => {
+test("Array", async () => {
   const interpreter = new DslInterpreter(allDescriptors);
-  const funcCallResult = interpreter.interpret(
+  const funcCallResult = await interpreter.interpret(
     "[Restaurant.all()[1].name, Restaurant.current().name]"
   );
   expect(funcCallResult).toEqual({
@@ -52,9 +52,9 @@ test("Array", () => {
   });
 });
 
-test("Array matching", () => {
+test("Array matching", async () => {
   const interpreter = new DslInterpreter(allDescriptors);
-  const funcCallResult = interpreter.interpret(
+  const funcCallResult = await interpreter.interpret(
     'Restaurant.current().menu.matching(field: .name, value: "hamburger")[0].name'
   );
   expect(funcCallResult).toEqual({
@@ -64,9 +64,9 @@ test("Array matching", () => {
   });
 });
 
-test("Array between", () => {
+test("Array between", async () => {
   const interpreter = new DslInterpreter(allDescriptors);
-  const funcCallResult = interpreter.interpret(
+  const funcCallResult = await interpreter.interpret(
     "Order.all().between(field: .dateTime, from: DateTime.today().addDateOffset(day: -7), to: DateTime.today())[0].restaurant.name"
   );
   expect(funcCallResult).toEqual({
@@ -76,9 +76,9 @@ test("Array between", () => {
   });
 });
 
-test("Array equals", () => {
+test("Array equals", async () => {
   const interpreter = new DslInterpreter(allDescriptors);
-  const funcCallResult = interpreter.interpret(
+  const funcCallResult = await interpreter.interpret(
     "Restaurant.all().equals(field: .priceGrade, value: 1)[0].name"
   );
   expect(funcCallResult).toEqual({
@@ -88,9 +88,9 @@ test("Array equals", () => {
   });
 });
 
-test("Array sort", () => {
+test("Array sort", async () => {
   const interpreter = new DslInterpreter(allDescriptors);
-  const funcCallResult = interpreter.interpret(
+  const funcCallResult = await interpreter.interpret(
     "Restaurant.all().sort(field: .priceGrade, ascending: false)[0].name"
   );
   expect(funcCallResult).toEqual({
@@ -100,9 +100,9 @@ test("Array sort", () => {
   });
 });
 
-test("find burger name", () => {
+test("find burger name", async () => {
   const interpreter = new DslInterpreter(allDescriptors);
-  const funcCallResult = interpreter.interpret(
+  const funcCallResult = await interpreter.interpret(
     'Restaurant.current().menu.matching(field: .name, value: "hamburger")[0].name'
   );
   expect(funcCallResult).toEqual({
@@ -112,12 +112,12 @@ test("find burger name", () => {
   });
 });
 
-test("best restaurant", () => {
+test("best restaurant", async () => {
   const interpreter = new DslInterpreter(allDescriptors);
-  const funcCallResult = interpreter.interpret(
+  const funcCallResult = await interpreter.interpret(
     'Restaurant.all().matching(field: .address, value: "palo alto").sort(field: .rating, ascending: false)[0]'
   );
-  expect(interpreter.describe(funcCallResult)).toEqual({
+  expect(await interpreter.describe(funcCallResult)).toEqual({
     type: "object",
     value: {
       address: "123 Main St, Palo Alto, USA",
@@ -129,12 +129,12 @@ test("best restaurant", () => {
   });
 });
 
-test("find cheap chinese restaurant", () => {
+test("find cheap chinese restaurant", async () => {
   const interpreter = new DslInterpreter(allDescriptors);
-  const funcCallResult = interpreter.interpret(
+  const funcCallResult = await interpreter.interpret(
     'Restaurant.all().matching(field: .cuisine, value: "chinese").sort(field: .priceGrade, ascending: true)[0]'
   );
-  expect(interpreter.describe(funcCallResult)).toEqual({
+  expect(await interpreter.describe(funcCallResult)).toEqual({
     type: "object",
     value: {
       address: "123 Main St, Palo Alto, USA",
@@ -146,23 +146,23 @@ test("find cheap chinese restaurant", () => {
   });
 });
 
-test("add hamburger to the order", () => {
+test("add hamburger to the order", async () => {
   const interpreter = new DslInterpreter(allDescriptors);
-  const funcCallResult = interpreter.interpret(
+  const funcCallResult = await interpreter.interpret(
     'Order.current().addFoods(foods: [Restaurant.current().menu.matching(field: .name, value: "hamburger")[0]])'
   );
-  expect(interpreter.describe(funcCallResult)).toEqual({
+  expect(await interpreter.describe(funcCallResult)).toEqual({
     type: "object",
     value: "undefined",
   });
 });
 
-test("add hamburger to the order (steps)", () => {
+test("add hamburger to the order (steps)", async () => {
   const interpreter = new DslInterpreter(allDescriptors);
-  const funcCallResult = interpreter.interpretSteps(
+  const funcCallResult: any[] = await interpreter.interpretSteps(
     "Restaurant.all().equals(field: .priceGrade, value: 1)[0].name"
   );
-  expect(interpreter.describeSteps(funcCallResult).reverse()[1]).toEqual({
+  expect((await interpreter.describeSteps(funcCallResult)).reverse()[1]).toEqual({
     type: "object",
     value: {
       address: "123 Main St, Palo Alto, USA",
@@ -174,11 +174,11 @@ test("add hamburger to the order (steps)", () => {
   });
 });
 
-test("DateTime object comparison", () => {
+test("DateTime object comparison", async () => {
   Restaurant.all();
   const interpreter = new DslInterpreter(allDescriptors);
   // order yestersday
-  const funcCallResult = interpreter.interpret(
+  const funcCallResult = await interpreter.interpret(
     "Order.all().between(field: .dateTime, from: DateTime(year: 2020, month: 2, day: 1, hour: 0, minute: 0), to: DateTime(year: 2020, month: 2, day: 1, hour: 23, minute: 59))[0].restaurant.name"
   );
   expect(funcCallResult).toEqual({
@@ -188,13 +188,13 @@ test("DateTime object comparison", () => {
   });
 });
 
-test("Order containing burger", () => {
+test("Order containing burger", async () => {
   Restaurant.all();
   const interpreter = new DslInterpreter(allDescriptors);
-  // const funcCallResult = interpreter.interpret(
+  // const funcCallResult = await interpreter.interpret(
   //     'Order.all().containing(field: .foods, value: Restaurant.current().menu.matching(field: .name, value: "hamburger")[0])[0].restaurant.name'
   // )
-  const funcCallResult = interpreter.interpret(
+  const funcCallResult = await interpreter.interpret(
     'Order.all().contains(field: .foods, value: Restaurant.current().menu.matching(field: .name, value: "hamburger")[0])[0].restaurant.name'
   );
   expect(funcCallResult).toEqual({
@@ -204,10 +204,10 @@ test("Order containing burger", () => {
   });
 });
 
-test("Order array distribution field", () => {
+test("Order array distribution field", async () => {
   Restaurant.all();
   const interpreter = new DslInterpreter(allDescriptors);
-    const funcCallResult = interpreter.interpret(
+    const funcCallResult = await interpreter.interpret(
         'Order.all().dateTime[0].dayOfWeek'
     );
     expect(funcCallResult).toEqual({
@@ -217,19 +217,19 @@ test("Order array distribution field", () => {
     });
 });
 
-test("Order array distribution function", () => {
+test("Order array distribution function", async () => {
     Restaurant.all();
     const interpreter = new DslInterpreter(allDescriptors);
-    const funcCallResult = interpreter.interpret(
+    const funcCallResult = await interpreter.interpret(
         'Order.all().placeOrder()'
     );
     expect(funcCallResult["objectType"]).toEqual("void");
 });
 
-test("[dry run] Order containing burger", () => {
+test("[dry run] Order containing burger", async () => {
   Restaurant.all();
   const interpreter = new DslInterpreter(allDescriptors, true);
-  const funcCallResult = interpreter.interpret(
+  const funcCallResult = await interpreter.interpret(
     'Order.all().contains(field: .foods, value: Restaurant.current().menu.matching(field: .name, value: "hamburger")[0])[0].restaurant.name'
   );
   expect(funcCallResult).toEqual({
@@ -239,11 +239,11 @@ test("[dry run] Order containing burger", () => {
   });
 });
 
-test("[dry run][error] Restaurant noise level", () => {
+test("[dry run][error] Restaurant noise level", async () => {
   Restaurant.all();
   const interpreter = new DslInterpreter(allDescriptors, true);
   try {
-    const funcCallResult = interpreter.interpret(
+    await interpreter.interpret(
         'Restaurant.All().matching(field: .noiseLevel, value: "quiet")'
     );
   } catch (e) {
@@ -251,11 +251,11 @@ test("[dry run][error] Restaurant noise level", () => {
   }
 });
 
-test("[dry run][error] Restaurant noise level 2", () => {
+test("[dry run][error] Restaurant noise level 2", async () => {
   Restaurant.all();
   const interpreter = new DslInterpreter(allDescriptors, true);
   try {
-    const funcCallResult = interpreter.interpret(
+    await interpreter.interpret(
         'Restaurant.All()[0].noiseLevel'
     );
   } catch (e) {
@@ -263,11 +263,11 @@ test("[dry run][error] Restaurant noise level 2", () => {
   }
 });
 
-test("[dry run][error] Restaurant notify when near", () => {
+test("[dry run][error] Restaurant notify when near", async () => {
   Restaurant.all();
   const interpreter = new DslInterpreter(allDescriptors, true);
   try {
-    const funcCallResult = interpreter.interpret(
+    await interpreter.interpret(
         'Order.current().notifyWhenNearLocation()'
     );
   } catch (e) {
@@ -275,11 +275,11 @@ test("[dry run][error] Restaurant notify when near", () => {
   }
 });
 
-test("[dry run][error] Login", () => {
+test("[dry run][error] Login", async () => {
   Restaurant.all();
   const interpreter = new DslInterpreter(allDescriptors, true);
   try {
-    const funcCallResult = interpreter.interpret(
+    await interpreter.interpret(
         'User.login()'
     );
   } catch (e) {
@@ -288,16 +288,16 @@ test("[dry run][error] Login", () => {
 });
 
 
-test("[dry run][error] String", () => {
+test("[dry run][error] String", async () => {
   Restaurant.all();
   const interpreter = new DslInterpreter(allDescriptors, true);
   try {
-    const funcCallResult = interpreter.interpret(
+    await interpreter.interpret(
       'Restaurant.All().matching(field: .location, value: "near me")'
     );
   } catch (e) {
     console.log(e)
-    expect(e.message).toEqual("Field String.rating is missing");
+    expect(e.message).toEqual("Field Restaurant.location is missing");
   }
 });
 
