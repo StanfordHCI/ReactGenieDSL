@@ -21,7 +21,7 @@ export let recentBooking = null;
 
 @GenieClass("Representing a date and time")
 export class DateTime extends HelperClass {
-  private date: Date;
+  private _date: Date;
 
   public year: number;
   public month: number;
@@ -31,12 +31,12 @@ export class DateTime extends HelperClass {
   public minute: number;
 
   private updateDate() {
-    this.year = this.date.getFullYear();
-    this.month = this.date.getMonth() + 1;
-    this.day = this.date.getDate();
-    this.hour = this.date.getHours();
-    this.minute = this.date.getMinutes();
-    this.dayOfWeek = this.date.toLocaleDateString("en-US", { weekday: "long" });
+    this.year = this._date.getFullYear();
+    this.month = this._date.getMonth() + 1;
+    this.day = this._date.getDate();
+    this.hour = this._date.getHours();
+    this.minute = this._date.getMinutes();
+    this.dayOfWeek = this._date.toLocaleDateString("en-US", { weekday: "long" });
   }
 
   static today() {
@@ -59,7 +59,7 @@ export class DateTime extends HelperClass {
 
   static fromDate(date: Date) {
     const dt = DateTime.CreateObject({});
-    dt.date = date;
+    dt._date = date;
     dt.updateDate();
     return dt;
   }
@@ -78,7 +78,7 @@ export class DateTime extends HelperClass {
   // custom comparator for sorting
 
   static compare(a: DateTime, b: DateTime) {
-    return a.date.getTime() - b.date.getTime();
+    return a._date.getTime() - b._date.getTime();
   }
 
   constructor({
@@ -95,7 +95,7 @@ export class DateTime extends HelperClass {
     minute?: number;
   }) {
     super({});
-    this.date = new Date();
+    this._date = new Date();
     this.setDate({ year, month, day, hour, minute });
   }
 
@@ -122,11 +122,11 @@ export class DateTime extends HelperClass {
     hour: number;
     minute: number;
   }) {
-    this.date.setFullYear(this.date.getFullYear() + year);
-    this.date.setMonth(this.date.getMonth() + month);
-    this.date.setDate(this.date.getDate() + day);
-    this.date.setHours(this.date.getHours() + hour);
-    this.date.setMinutes(this.date.getMinutes() + minute);
+    this._date.setFullYear(this._date.getFullYear() + year);
+    this._date.setMonth(this._date.getMonth() + month);
+    this._date.setDate(this._date.getDate() + day);
+    this._date.setHours(this._date.getHours() + hour);
+    this._date.setMinutes(this._date.getMinutes() + minute);
     this.updateDate();
     return this;
   }
@@ -147,24 +147,24 @@ export class DateTime extends HelperClass {
     day_of_the_week?: number;
   }) {
     if (year !== undefined) {
-      this.date.setFullYear(year);
+      this._date.setFullYear(year);
     }
     if (month !== undefined) {
-      this.date.setMonth(month - 1);
+      this._date.setMonth(month - 1);
     }
     if (day !== undefined) {
-      this.date.setDate(day);
+      this._date.setDate(day);
     }
     if (day_of_the_week !== undefined) {
-      this.date.setDate(
-        this.date.getDate() + (day_of_the_week - this.date.getDay())
+      this._date.setDate(
+        this._date.getDate() + (day_of_the_week - this._date.getDay())
       );
     }
     if (hour !== undefined) {
-      this.date.setHours(hour);
+      this._date.setHours(hour);
     }
     if (minute !== undefined) {
-      this.date.setMinutes(minute);
+      this._date.setMinutes(minute);
     }
     this.updateDate();
     return this;

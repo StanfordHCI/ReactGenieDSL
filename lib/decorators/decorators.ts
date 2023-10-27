@@ -434,7 +434,7 @@ export function GenieClass(comment: string) {
         };
 
         // find all fields
-        let allFields = Object.getOwnPropertyNames(obj);
+        let allFields = Object.getOwnPropertyNames(obj).filter((name) => name[0] !== "_");
         // filter out functions
         allFields = allFields.filter((field) => {
           // console.log(field);
