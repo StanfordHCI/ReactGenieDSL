@@ -316,20 +316,26 @@ export class DslInterpreter {
    * interpret a DSL expression
    **/
   public async interpret(input: string): Promise<any> {
-    const ast = parse(input)[0];
-    // console.log(JSON.stringify(ast));
-    // ast = {"type":"access","parent":{"type":"access","parent":"Restaurant","access":{"type":"function_call","func_name":"current","parameters":null}},"access":{"type":"function_call","func_name":"book","parameters":[{"parameter":"dateTime","value":{"type":"function_call","func_name":"DateTime","parameters":[{"parameter":"year","value":{"type":"int","value":2020}},{"parameter":"month","value":{"type":"int","value":1}},{"parameter":"day","value":{"type":"int","value":1}},{"parameter":"hour","value":{"type":"int","value":12}},{"parameter":"minute","value":{"type":"int","value":0}}]}}]}}
-    return await this.resolve(ast);
+    const ast = parse(input) as object[];
+    var lastResult = null;
+    for (const statement of ast) {
+      lastResult = await this.resolve(statement);
+    }
+    return lastResult;
   }
 
   public async interpretSteps(input: string): Promise<any[]> {
-    const ast = parse(input)[0];
-    // console.log(JSON.stringify(ast));
-    this.resolveSteps = [];
-    this.resolveStepsEnabled = true;
-    await this.resolve(ast);
-    this.resolveStepsEnabled = false;
-    return this.resolveSteps;
+    const ast = parse(input) as object[];
+    var lastResult = null;
+    for (const statement of ast) {
+      // console.log(JSON.stringify(ast));
+      this.resolveSteps = [];
+      this.resolveStepsEnabled = true;
+      lastResult = await this.resolve(ast);
+      this.resolveStepsEnabled = false;
+      return this.resolveSteps;
+    }
+    return lastResult;
   }
 
   /**
