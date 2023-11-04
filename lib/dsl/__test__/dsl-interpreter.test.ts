@@ -311,6 +311,19 @@ test("[dry run][error] String", async () => {
   }
 });
 
+test("GetObject", async () => {
+  Restaurant.all();
+  const interpreter = new DslInterpreter(allDescriptors, true);
+  try {
+    await interpreter.interpret(
+      'Restaurant.GetObject(id:0)'
+    );
+  } catch (e) {
+    console.log(e)
+    expect(e.message).toEqual("Field Restaurant.location is missing");
+  }
+});
+
 
 
 

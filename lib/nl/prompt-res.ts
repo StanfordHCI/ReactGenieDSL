@@ -59,3 +59,9 @@ export function agent_response_prompt(
     `agent_response:`
   );
 }
+
+export const parse_issues = `
+// Here are the issues that need to be noticed
+// 1. Use "Array[index]" instead of index related functions. For example, "hotels[0]" instead of "hotels.first()"
+// 2. Use "setProperty(value) instead of "property = value". For example, "hotel.setName(123)" instead of "hotel.name = 123"
+// 3. Use ";" between multiple function calls. For example, "hotel.setName(123); hotel.setDesc(123)"`
