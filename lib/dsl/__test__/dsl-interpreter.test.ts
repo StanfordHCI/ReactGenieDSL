@@ -235,6 +235,16 @@ test("Multiple actions", async () => {
     expect(funcCallResult["objectType"]).toEqual("string");
 });
 
+test("Single actions with semicolon", async () => {
+    Restaurant.all();
+    const interpreter = new DslInterpreter(allDescriptors);
+    const funcCallResult = await interpreter.interpret(
+        'Order.all().dateTime[0].dayOfWeek;'
+    );
+    expect(funcCallResult["objectType"]).toEqual("string");
+});
+
+
 
 test("[dry run] Order containing burger", async () => {
   Restaurant.all();

@@ -43,7 +43,7 @@ export class BasicPromptGen {
       )}${post_section_separator}` +
       `${example_prequel}${pre_section_separator}` +
       `${example_parses(this.examples)}${post_section_separator}` +
-      `${parse_issues}${post_section_separator}` +
+      // `${parse_issues}${post_section_separator}` +
       `${user_interaction_prequel}${pre_section_separator}`;
     if (this.extraPrompt !== undefined) {
       prompt += `${this.extraPrompt}${pre_section_separator}`;
