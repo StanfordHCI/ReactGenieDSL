@@ -3,24 +3,24 @@ import { ExampleParse } from "./prompt-gen";
 export const pre_section_separator = "\n";
 export const post_section_separator = "\n\n\n";
 
-export const class_prequel = "// Here are all the function that we have";
+export const class_prequel = "// Here are all the functions";
 
 export const array_definition =
   "extension Array<Type> {\n" +
-  "    // find items with matching field in an array\n" +
-  "    Array<Type> matching(field: Field, value: Value);\n" +
-  "    \n" +
-  "    // find items with exact field in an array\n" +
-  "    Array<Type> equal(field: Field, value: Value);\n" +
-  "    \n" +
-  "    // find items with field between two values in an array\n" +
-  "    Array<Type> between(field: Field, from: Value, to: Value);\n" +
-  "    \n" +
-  "    // find items with field contains the value in an array\n" +
-  "    Array<Type> contains(field: Field, value: Value);\n" +
-  "    \n" +
-  "    // sort items according the field in an array\n" +
-  "    Array<Type> sort(field: Field, ascending: boolean);\n" +
+  "    //Find items with matching fields in an array\n" +
+  "    Array<Type> matching(field: Field, value: Type);\n" +
+  "\n" +
+  "    // Find items with field in an array that contains a specific value\n" +
+  "    Array<Type> contains(field: Field, value: Type);\n" +
+  "\n" +
+  "    // Find items with exact fields in an array\n" +
+  "    Array<Type> equals(field: Field, value: Type);\n" +
+  "\n" +
+  "    //Find items with the field between two values in an array\n" +
+  "    Array<Type> between(field: Field, from: Type, to: Type);\n" +
+  "\n" +
+  "    //Sort an array based on a specific field in ascending or descending order\n" +
+  "    Array<Type> sort(field: Field, ascending: bool);\n" +
   "}";
 
 export const class_separator = "\n\n";

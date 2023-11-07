@@ -289,3 +289,8 @@ test("parse", () => {
     type: "access",
   });
 });
+
+test("parser error test", () => {
+  const result = parse("Booking.Current().payment.setProperty(method: \"MasterCard\"); Booking.Current().confirm();");
+  console.log(result);
+});
