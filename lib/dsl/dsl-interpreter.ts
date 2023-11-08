@@ -331,7 +331,7 @@ export class DslInterpreter {
       // console.log(JSON.stringify(ast));
       this.resolveSteps = [];
       this.resolveStepsEnabled = true;
-      lastResult = await this.resolve(ast);
+      lastResult = await this.resolve(statement);
       this.resolveStepsEnabled = false;
       return this.resolveSteps;
     }
@@ -425,14 +425,17 @@ export class DslInterpreter {
       case "int":
       case "boolean":
       case "accessor":
+      case "object":
         result = ast;
         break;
+
       default:
         throw new Error("Unsupported AST type: " + ast.type);
     }
     if (this.resolveStepsEnabled) {
       this.resolveSteps.push({ ast: ast, result: result });
     }
+    console.log(result)
     return result;
   }
 
@@ -466,10 +469,14 @@ export class DslInterpreter {
                 parent: v
               }, env)
           ));
+          let objType = null
+          if (arrayValue.length > 0) {
+            objType = arrayValue[0].objectType
+          }
           return {
             type: "array",
             value: arrayValue,
-            objectType: arrayValue[0].objectType
+            objectType: objType
           };
         }
         else {
@@ -624,11 +631,18 @@ export class DslInterpreter {
           break;
         // deal with array functions (`matching`, `between`, `equals`)
         case "array":
+          if(env.value.length == 0)
+            return{
+              type: "array",
+              value: [],
+              objectType: null
+            }
           funcDescriptor = this.arrayFunctionDescriptors.find(
             (f) => f.func_name === ast.func_name
           );
-          if (funcDescriptor === undefined) {
+          if (funcDescriptor === undefined || env.value[0]["type"] === "array") {
             const arrayValue = await Promise.all(env.value.map((v) => this.resolveFunctionCall(ast, v)));
+
             return {
                 type: "array",
                 value: arrayValue,

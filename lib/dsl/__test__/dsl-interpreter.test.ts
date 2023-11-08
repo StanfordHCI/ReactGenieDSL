@@ -100,6 +100,30 @@ test("Array sort", async () => {
   });
 });
 
+test("Array.Array", async () => {
+  const interpreter = new DslInterpreter(allDescriptors);
+  const funcCallResult = await interpreter.interpret(
+    "Restaurant.all().menu.matching(field:.name, value:\"Hamburger\")[0][0].name"
+  );
+  expect(funcCallResult).toEqual({
+    objectType: "string",
+    type: "object",
+    value: "Hamburger",
+  });
+});
+
+// test("index in Array.Array", async () => {
+//   const interpreter = new DslInterpreter(allDescriptors);
+//   const funcCallResult = await interpreter.interpret(
+//     "Restaurant.all().menu.matching(field:.name, value:\"Hamburger\")[0]"
+//   );
+//   expect(funcCallResult).toEqual({
+//     objectType: "string",
+//     type: "object",
+//     value: "Taste",
+//   });
+// });
+
 test("find burger name", async () => {
   const interpreter = new DslInterpreter(allDescriptors);
   const funcCallResult = await interpreter.interpret(
@@ -330,7 +354,7 @@ test("GetObject", async () => {
     );
   } catch (e) {
     console.log(e)
-    expect(e.message).toEqual("Field Restaurant.location is missing");
+    expect(e.message).toEqual("Function Restaurant.GetObject is missing");
   }
 });
 
