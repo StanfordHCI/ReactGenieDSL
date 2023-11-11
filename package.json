@@ -1,6 +1,6 @@
 {
     "name": "reactgenie-dsl",
-    "version": "0.0.35",
+    "version": "0.0.36",
     "description": "A natural language parser based on a large language model",
     "scripts": {
         "prepare": "peggy lib/dsl/parser.pegjs -o lib/dsl/parser.gen.js && tsc",

@@ -16,7 +16,7 @@ test('Parser basics', async () => {
     'get me the cheapest restaurant in palo alto'
   );
   return expect(parsed).toBe(
-    'Restaurant.all().matching(field: .address, value: "palo alto").sort(field: .price, ascending: true)[0]'
+    'Restaurant.all().matching(field: .address, value: "palo alto").sort(field: .priceGrade, ascending: true)[0]'
   );
 });
 
