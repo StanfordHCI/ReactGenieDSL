@@ -240,7 +240,8 @@ export class DateTime extends HelperClass {
       new FieldDescriptor("friday", "int", true),
       new FieldDescriptor("saturday", "int", true),
     ],
-    DateTime
+    DateTime,
+    "Representing a date and time"
   );
 }
 
@@ -301,7 +302,8 @@ export class Food extends DataClass {
         "The restaurant this food is served at"
       ),
     ],
-    Food
+    Food,
+    "A food item"
   );
 }
 
@@ -409,7 +411,8 @@ export class Order extends DataClass {
       new FieldDescriptor("foods", "Food[]", false),
       new FieldDescriptor("restaurant", "Restaurant", false),
     ],
-    Order
+    Order,
+    "An Order"
   );
 }
 
@@ -668,7 +671,8 @@ export class Restaurant extends DataClass {
       new FieldDescriptor("address", "string", false),
       new FieldDescriptor("orders", "Order[]", false),
     ],
-    Restaurant
+    Restaurant,
+    "A restaurant"
   );
 }
 

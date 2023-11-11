@@ -202,7 +202,8 @@ export class ClassDescriptor<T extends GenieObject> {
     public className: string,
     functions: FuncDescriptor[],
     fields: FieldDescriptor[],
-    public classConstructor: { new (...any): T }
+    public classConstructor: { new (...any): T },
+    public comment: string = ""
   ) {
     this.functions = new Set(functions);
     this.fields = new Set(fields);
@@ -210,6 +211,7 @@ export class ClassDescriptor<T extends GenieObject> {
 
   description(): string {
     return (
+      (this.comment !== "" ? `// ${this.comment}\n` : "") +
       `class ${this.className} {\n` +
       Array.from(this.fields)
         .map((f) => "\t" + f.description())

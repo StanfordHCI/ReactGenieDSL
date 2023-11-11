@@ -249,7 +249,7 @@ const deserializeField =
     return value;
   };
 
-export function GenieClass(comment: string) {
+export function GenieClass(comment: string = "") {
   return function (target: any) {
     // console.debug("GenieClass decorator called on " + target.name);
 
@@ -259,7 +259,8 @@ export function GenieClass(comment: string) {
         target.name,
         target.__class_descriptor_functions,
         target.__class_descriptor_properties,
-        target
+        target,
+        comment
       );
     }
 
