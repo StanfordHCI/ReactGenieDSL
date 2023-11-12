@@ -162,6 +162,12 @@ export class DslInterpreter {
       "object",
       false
     ),
+    new FuncDescriptor(
+      "length",
+      [],
+      "int",
+      false
+    )
   ];
   // implementations of functions
   private arrayFunctionImplementations: {
@@ -294,6 +300,9 @@ export class DslInterpreter {
       }
       return array[index];
     },
+    length: ({ array }: { array: any[] }) => {
+      return array.length;
+    }
   };
 
   // endregion
@@ -709,7 +718,7 @@ export class DslInterpreter {
       : this.strip(env);
 
     if (isArray) {
-      if (ast.func_name != "index") {
+      if (ast.func_name != "index" && ast.func_name != "length") {
         const classDescriptor = this.classDescriptors.find(
           (c) => c.className === env.value[0].objectType
         );

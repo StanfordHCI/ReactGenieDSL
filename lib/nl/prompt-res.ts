@@ -7,7 +7,7 @@ export const class_prequel = "// Here are all the functions";
 
 export const array_definition =
   "extension Array<Type> {\n" +
-  "    //Find items with matching fields in an array\n" +
+  "    // Find items with matching fields in an array\n" +
   "    Array<Type> matching(field: Field, value: Type);\n" +
   "\n" +
   "    // Find items with field in an array that contains a specific value\n" +
@@ -16,11 +16,17 @@ export const array_definition =
   "    // Find items with exact fields in an array\n" +
   "    Array<Type> equals(field: Field, value: Type);\n" +
   "\n" +
-  "    //Find items with the field between two values in an array\n" +
+  "    // Find items with the field between two values in an array\n" +
   "    Array<Type> between(field: Field, from: Type, to: Type);\n" +
   "\n" +
-  "    //Sort an array based on a specific field in ascending or descending order\n" +
+  "    // Sort an array based on a specific field in ascending or descending order\n" +
   "    Array<Type> sort(field: Field, ascending: bool);\n" +
+  "\n" +
+  "    // Get length of an array\n" +
+  "    int length();\n" +
+  "\n" +
+  "    // Index (`array[index]`) into an array (index can be negative, which means counting from the end)\n" +
+  "    Type index(int index);\n" +
   "}";
 
 export const class_separator = "\n\n";
