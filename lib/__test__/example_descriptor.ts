@@ -592,6 +592,18 @@ export class Restaurant extends DataClass {
     recentBooking = `${this.name} is booking for ${dateTime.toString()}`;
   }
 
+  @GenieFunction("Book numbers tables for a given date time")
+  bookTable({ dateTime = undefined, number }: { dateTime?: DateTime, number?: int }): void {
+    if (dateTime === undefined) {
+      dateTime = DateTime.today();
+    }
+    if (number === undefined) {
+      number = 1;
+    }
+    console.log(`${this.name} is booking ${number} tables for ${dateTime.toString()}`);
+    recentBooking = `${this.name} is booking ${number} tables for ${dateTime.toString()}`;
+  }
+
   @GenieKey
   @GenieProperty("Name of the restaurant")
   public name: string;
@@ -660,6 +672,16 @@ export class Restaurant extends DataClass {
         "void",
         false,
         "Book a table for a given date time"
+      ),
+      new FuncDescriptor(
+        "bookTable",
+        [
+          new ParamDescriptor("dateTime", "DateTime", false, null),
+          new ParamDescriptor("number", "int", false, null)
+        ],
+        "void",
+        false,
+        "Book numbers tables for a given date time"
       ),
     ],
     [

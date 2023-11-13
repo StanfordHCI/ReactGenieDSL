@@ -620,7 +620,10 @@ export function GenieFunction(comment: string = "") {
         const paramValueObj = destructingParamValues[0];
         parameters = Object.keys(paramTypeObj).map((paramName) => {
           const paramType = classToName(paramTypeObj[paramName].type);
-          const paramValue = paramValueObj[paramName];
+          let paramValue = paramValueObj[paramName];
+          if (paramValue === undefined || paramValue === "undefined") {
+            paramValue = null;
+          }
           const paramOptional = paramTypeObj[paramName].optional;
           return new ParamDescriptor(paramName, paramType, !paramOptional, paramValue);
         });

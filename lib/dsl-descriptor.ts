@@ -126,12 +126,12 @@ export class ParamDescriptor {
     public name: string,
     public type: string,
     public required: boolean = true,
-    public defaultValue?: any
+    public defaultValue: any = null
   ) {}
   description(): string {
     return (
       `${this.name}: ${this.type}` + (this.required ? "" : "?") +
-      (this.defaultValue ? ` = ${this.defaultValue}` : "")
+      (this.defaultValue ? ` = \`${this.defaultValue}\`` : "")
     );
   }
 }
