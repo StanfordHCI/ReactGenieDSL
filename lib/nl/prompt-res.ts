@@ -24,9 +24,6 @@ export const array_definition =
   "\n" +
   "    // Get length of an array\n" +
   "    int length();\n" +
-  "\n" +
-  "    // Index (`array[index]`) into an array (index can be negative, which means counting from the end)\n" +
-  "    Type index(int index);\n" +
   "}";
 
 export const class_separator = "\n\n";

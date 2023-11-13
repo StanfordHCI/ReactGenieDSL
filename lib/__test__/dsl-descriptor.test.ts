@@ -19,7 +19,7 @@ test("Restaurant Description", async () => {
       "\t// The current restaurant\n" +
       "\tstatic Restaurant current();\n" +
       "\t// Book a table for a given date time\n" +
-      "\tvoid book(dateTime: DateTime);\n" +
+      "\tvoid book(dateTime: DateTime? = DateTime.today());\n" +
       "}"
   );
 });
