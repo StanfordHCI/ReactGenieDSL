@@ -130,7 +130,7 @@ export class ParamDescriptor {
   ) {}
   description(): string {
     return (
-      `${this.name}: ${this.type}` +
+      `${this.name}: ${this.type}` + (this.required ? "" : "?") +
       (this.defaultValue ? ` = ${this.defaultValue}` : "")
     );
   }

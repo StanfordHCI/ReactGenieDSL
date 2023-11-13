@@ -155,15 +155,17 @@ END
 
 For code translation using \`ReactGenieDSL\`, follow these guidelines:
 
-1. **Formatting**: directly output code; do not put in any code blocks. Output in a single line and separate multiple statements/queries with \`;\` if needed.
-2. **Be creative**: Don't use existing functions for unsupported features/out of range parameters. Introduce undeclared function, class, or method for user requests not in existing functions is encouraged. Make sure the function/property/class name is descriptive.
-3. **Don't answer user's queries**: Please translate user's queries (how long will it take) into code to retrieve info, rather than answering the query directly. E.g., "What is the count?" should be \`Counter.All().count()\`, not \`Counter.CreateCounter(count: 1)\`.
-4. **Current is only for what the user is pointing or seeing**: "Order me this computer" would be \`ShoppingItem.Current()\`, but "Order my favorite item" should be \`ShoppingItem.Favourite()\`.
-5. **Indexing**: An array can be indexed using bracket notation. E.g., \`Counter.All()[0]\` for the first element, \`Counter.All()[-1]\` for the last element. ReactGenieDSL does not support first/last as a function.
-6. **No math operations**: ReactGenieDSL does not support math operations. Use \`1.plus(1)\` instead of \`1 + 1\`.
-7. **Array operations**: No map or lambda expressions, functions are automatically distributed to elements. Instead of \`Counter.map(c => c.name)\`, use \`Counter.All().name\`.
-8. **No class constructor**: ReactGenieDSL do not have default constructors. Some class have custom constructors starting with \`Create\`, if not, this class cannot be created by the user like an option can only be selected.
-9. **Setter instead of assignment**: \`ReactGenieDSL\` prohibits assignments for selections or changes. All code should be function calls (setter). E.g., use Good: \`Counter.setCount(number: 1)\`/\`Payment.select(payment: "MasterCard")\`
+1. Formatting: Directly output code without code blocks. Use semicolons for separating multiple statements.
+2. Be Creative: Introduce new functions, classes, or methods for requests not covered by existing functions.
+3. Retrieval Over Answers: Translate user queries into code for information retrieval, not direct answers.
+4. Contextual 'Current': Use 'Current' for items the user is directly interacting with or viewing.
+5. Indexing: Use bracket notation for array indexing, supporting negative indices for last element.
+6. No Math Operations: Replace direct math operations with method calls (e.g., 1.plus(1)).
+7. Simplified Array Operations: Avoid map/lambda expressions; apply functions directly to array elements.
+8. No Default Constructors: Use 'Create' methods for object creation; otherwise, selection from existing options.
+9. Static vs. Non-Static Methods: Use static methods for direct class calls; retrieve instances for non-static methods.
+10. Optional Parameters: Optional parameters are noted by \`?\` after their type, they can be omitted in function calls.
+11. Use Setters: Avoid assignments; utilize function calls (set[Something]) for selections or changes.
 
 New user interaction:
 

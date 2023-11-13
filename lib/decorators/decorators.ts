@@ -587,6 +587,12 @@ export function GenieFunction(comment: string = "") {
         propertyKey
       );
 
+      const destructingParamValues = Reflect.getMetadata(
+        "design:destructuringparamvalues",
+        target,
+        propertyKey
+      );
+
       const funcName = propertyKey;
 
       if (returnType === undefined) {
@@ -605,15 +611,18 @@ export function GenieFunction(comment: string = "") {
       }
       if (paramTypes.length == 1) {
         // get the parameter names
-        if (destructuringParamTypes.length !== 1) {
+        if (destructuringParamTypes.length !== 1 || destructingParamValues.length !== 1) {
           throw new Error(
             "deconstructed parameters should be the same number as the number of parameters"
           );
         }
         const paramTypeObj = destructuringParamTypes[0];
+        const paramValueObj = destructingParamValues[0];
         parameters = Object.keys(paramTypeObj).map((paramName) => {
-          const paramType = classToName(paramTypeObj[paramName]);
-          return new ParamDescriptor(paramName, paramType);
+          const paramType = classToName(paramTypeObj[paramName].type);
+          const paramValue = paramValueObj[paramName];
+          const paramOptional = paramTypeObj[paramName].optional;
+          return new ParamDescriptor(paramName, paramType, !paramOptional, paramValue);
         });
       }
 

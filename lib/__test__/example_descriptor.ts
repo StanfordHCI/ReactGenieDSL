@@ -587,7 +587,7 @@ export class Restaurant extends DataClass {
   }
 
   @GenieFunction("Book a table for a given date time")
-  book({ dateTime }: { dateTime: DateTime }): void {
+  book({ dateTime = DateTime.today() }: { dateTime?: DateTime }): void {
     console.log(`${this.name} is booking for ${dateTime.toString()}`);
     recentBooking = `${this.name} is booking for ${dateTime.toString()}`;
   }
@@ -656,7 +656,7 @@ export class Restaurant extends DataClass {
       ),
       new FuncDescriptor(
         "book",
-        [new ParamDescriptor("dateTime", "DateTime")],
+        [new ParamDescriptor("dateTime", "DateTime", false, "DateTime.today()")],
         "void",
         false,
         "Book a table for a given date time"
