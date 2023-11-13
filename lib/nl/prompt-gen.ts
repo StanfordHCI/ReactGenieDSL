@@ -9,12 +9,13 @@ import {
   pre_section_separator,
   user_interaction_prequel,
   user_interaction_prompt,
-  parse_issues,
+  parse_issues, parseCodePrompt
 } from "./prompt-res";
 import { ClassDescriptor, GenieObject } from "../dsl-descriptor";
 
 export interface PromptGen {
   prompt(user_utterance: string): string;
+  zero_shot_prompt(user_utterance: string): string;
 
   response_prompt(
     user_utterance: string,
@@ -51,8 +52,18 @@ export class BasicPromptGen {
     return prompt;
   }
 
+  zero_shot_prompt_basic(): string {
+    return parseCodePrompt(this.prompt_basic())
+  }
+
   prompt(user_utterance: string): string {
     let prompt = this.prompt_basic();
+    prompt += `${user_interaction_prompt(user_utterance)}`;
+    return prompt;
+  }
+
+  zero_shot_prompt(user_utterance: string): string {
+    let prompt = this.zero_shot_prompt_basic();
     prompt += `${user_interaction_prompt(user_utterance)}`;
     return prompt;
   }

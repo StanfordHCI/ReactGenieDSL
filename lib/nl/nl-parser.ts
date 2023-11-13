@@ -16,7 +16,7 @@ export class NlParser {
     this.openAiApi = new OpenAIApi(configuration);
   }
 
-  async parse(nl: string): Promise<string | null> {
+  async oldParse(nl: string): Promise<string | null> {
     const prompt = this.prompt.prompt(nl);
     const response = await this.openAiApi.createCompletion({
       model: "code-davinci-002",
@@ -29,6 +29,27 @@ export class NlParser {
       stop: ["\n"],
     });
     return await response.data.choices[0]?.text.trim();
+  }
+
+  async parse(nl: string): Promise<string | null> {
+    const prompt = this.prompt.zero_shot_prompt(nl);
+    const response = await this.openAiApi.createChatCompletion({
+      model: "gpt-4",
+      temperature: 0,
+      top_p: 1,
+      n: 1,
+      stream: false,
+      max_tokens: 256,
+      presence_penalty: 0,
+      frequency_penalty: 0,
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+    });
+    return response.data.choices[0]?.message.content.replaceAll("`", "").trim();
   }
 
   async parseGpt4(nl: string): Promise<string | null> {

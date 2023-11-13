@@ -30,7 +30,7 @@ test('Parser complex', async () => {
     'order the same burger that I ordered at mcDonald last time'
   );
   return expect(parsed).toBe(
-    'Order.current().addFoods(foods: Order.all().matching(field: .restaurant, value: Restaurant.all().matching(field: .name, value: "mcDonald")[0]).sort(field: .dateTime, ascending: false)[0].foods.matching(field: .name, value: "burger"))'
+    'Order.current().addFoods(foods: [Order.all().matching(field: .restaurant, value: Restaurant.all().matching(field: .name, value: "mcDonald")[0]).sort(field: .dateTime, ascending: false)[0].foods.matching(field: .name, value: "burger")[0]])'
   );
 });
 
