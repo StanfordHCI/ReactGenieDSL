@@ -318,13 +318,13 @@ export class Order extends DataClass {
   static _current: Order = undefined;
 
   @GenieFunction("Get the current order")
-  static current(): Order {
+  static async current(): Promise<Order> {
     if (this._current === undefined) {
       this._current = Order.CreateObject({
         orderId: (Order.all().length + 1).toString(),
         dateTime: DateTime.fromDate(new Date()),
         foods: [],
-        restaurant: Restaurant.current(),
+        restaurant: await Restaurant.current(),
       });
     }
     return this._current;
@@ -582,7 +582,12 @@ export class Restaurant extends DataClass {
   }
 
   @GenieFunction("Get the current restaurant")
-  static current(): Restaurant {
+  static async current(): Promise<Restaurant> {
+    await new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(void 0);
+      }, 10);
+    });
     return this.all()[0];
   }
 
