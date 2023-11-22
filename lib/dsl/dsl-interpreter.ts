@@ -6,6 +6,14 @@ import {
   ParamDescriptor,
 } from "../dsl-descriptor";
 
+async function promiseOneByOne(promiseList: Promise<any>[]) {
+  let result = [];
+  for (const p of promiseList) {
+    result.push(await p);
+  }
+  return result;
+}
+
 function parseType(value_type: string): {
   is_array: boolean;
   original_type: string;
@@ -356,7 +364,7 @@ export class DslInterpreter {
       case "array":
         return {
           type: "array",
-          elements: await Promise.all(
+          elements: await promiseOneByOne(
             ast.value.map(async (e) => await this.describe(e))),
         };
       case "string":
@@ -382,7 +390,7 @@ export class DslInterpreter {
   }
 
   public async describeSteps(list: any[]) {
-    return await Promise.all(list.map((e) => this.describe(e.result)));
+    return await promiseOneByOne(list.map((e) => this.describe(e.result)));
   }
 
   /**
@@ -472,7 +480,7 @@ export class DslInterpreter {
       );
       if (classDescriptor === undefined) {
         if (parent.type == "array") {
-          const arrayValue = await Promise.all(parent.value.map(
+          const arrayValue = await promiseOneByOne(parent.value.map(
               (v: any) => this.resolveAccess({
                 ...ast,
                 parent: v
@@ -577,7 +585,7 @@ export class DslInterpreter {
    */
   private async resolveArray(ast: any, env: any) {
     console.assert(env == null);
-    const values = await Promise.all(ast.value.map((v) => this.resolve(v, null)));
+    const values = await promiseOneByOne(ast.value.map((v) => this.resolve(v, null)));
     // make sure all the elements are objects
     console.assert(values.every((v) => v.type === "object"));
     // make sure all the elements have the same type
@@ -597,7 +605,7 @@ export class DslInterpreter {
   private async resolveFunctionCall(ast: any, env: any) {
     const parameters =
       ast.parameters !== null
-        ? new Map(await Promise.all(
+        ? new Map(await promiseOneByOne(
             ast.parameters.map(async (p) => [
               p.parameter,
               await this.resolve(p.value, null),
@@ -650,7 +658,7 @@ export class DslInterpreter {
             (f) => f.func_name === ast.func_name
           );
           if (funcDescriptor === undefined || env.value[0]["type"] === "array") {
-            const arrayValue = await Promise.all(env.value.map((v) => this.resolveFunctionCall(ast, v)));
+            const arrayValue = await promiseOneByOne(env.value.map((v) => this.resolveFunctionCall(ast, v)));
 
             return {
                 type: "array",
