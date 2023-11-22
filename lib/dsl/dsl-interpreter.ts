@@ -362,10 +362,13 @@ export class DslInterpreter {
   public async describe(ast: any) {
     switch (ast.type) {
       case "array":
+        const elements = []
+        for (const e of ast.value) {
+          elements.push(await this.describe(e))
+        }
         return {
           type: "array",
-          elements: await promiseOneByOne(
-            ast.value.map(async (e) => await this.describe(e))),
+          elements: elements,
         };
       case "string":
       case "int":
@@ -390,7 +393,11 @@ export class DslInterpreter {
   }
 
   public async describeSteps(list: any[]) {
-    return await promiseOneByOne(list.map((e) => this.describe(e.result)));
+    const steps = []
+    for (const e of list) {
+      steps.push(await this.describe(e))
+    }
+    return steps;
   }
 
   /**
@@ -480,12 +487,13 @@ export class DslInterpreter {
       );
       if (classDescriptor === undefined) {
         if (parent.type == "array") {
-          const arrayValue = await promiseOneByOne(parent.value.map(
-              (v: any) => this.resolveAccess({
-                ...ast,
-                parent: v
-              }, env)
-          ));
+          const arrayValue = [];
+          for (const v of parent.value) {
+            arrayValue.push(await this.resolveAccess({
+              ...ast,
+              parent: v
+            }, env));
+          }
           let objType = null
           if (arrayValue.length > 0) {
             objType = arrayValue[0].objectType
@@ -585,7 +593,10 @@ export class DslInterpreter {
    */
   private async resolveArray(ast: any, env: any) {
     console.assert(env == null);
-    const values = await promiseOneByOne(ast.value.map((v) => this.resolve(v, null)));
+    const values = [];
+    for (const v of ast.value) {
+      values.push(await this.resolve(v, null));
+    }
     // make sure all the elements are objects
     console.assert(values.every((v) => v.type === "object"));
     // make sure all the elements have the same type
@@ -603,15 +614,13 @@ export class DslInterpreter {
    * @private
    */
   private async resolveFunctionCall(ast: any, env: any) {
-    const parameters =
-      ast.parameters !== null
-        ? new Map(await promiseOneByOne(
-            ast.parameters.map(async (p) => [
-              p.parameter,
-              await this.resolve(p.value, null),
-            ])
-          ))
-        : new Map([]);
+    const parameter_entries = [];
+    if (ast.parameters !== null) {
+      for (const p of ast.parameters) {
+        parameter_entries.push([p.parameter, await this.resolve(p.value, env)]);
+      }
+    }
+    const parameters = new Map(parameter_entries);
     // find the function descriptor
     let classDescriptor: ClassDescriptor<GenieObject>;
     let funcDescriptor: FuncDescriptor;
@@ -658,7 +667,10 @@ export class DslInterpreter {
             (f) => f.func_name === ast.func_name
           );
           if (funcDescriptor === undefined || env.value[0]["type"] === "array") {
-            const arrayValue = await promiseOneByOne(env.value.map((v) => this.resolveFunctionCall(ast, v)));
+            const arrayValue = [];
+            for (const v of env.value) {
+              arrayValue.push(await this.resolveFunctionCall(ast, v));
+            }
 
             return {
                 type: "array",
