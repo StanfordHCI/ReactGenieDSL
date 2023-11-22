@@ -341,18 +341,19 @@ export class DslInterpreter {
     return lastResult;
   }
 
-  public async interpretSteps(input: string): Promise<any[]> {
+  public async interpretSteps(input: string): Promise<{ ast: any, result: any, steps: {ast: any, result: any}[] }[]> {
     const ast = parse(input) as object[];
     var lastResult = null;
+    let allSteps = [];
     for (const statement of ast) {
       // console.log(JSON.stringify(ast));
       this.resolveSteps = [];
       this.resolveStepsEnabled = true;
       lastResult = await this.resolve(statement);
       this.resolveStepsEnabled = false;
-      return this.resolveSteps;
+      allSteps.push({ ast: statement, result: lastResult, steps: this.resolveSteps });
     }
-    return lastResult;
+    return allSteps;
   }
 
   /**
@@ -383,6 +384,7 @@ export class DslInterpreter {
               value: ast.value,
             };
           } else {
+            await ast.value.update()
             return { type: "object", value: await ast.value.description() };
           }
         } else {
@@ -395,7 +397,7 @@ export class DslInterpreter {
   public async describeSteps(list: any[]) {
     const steps = []
     for (const e of list) {
-      steps.push(await this.describe(e))
+      steps.push(await this.describe(e.result))
     }
     return steps;
   }
@@ -528,6 +530,7 @@ export class DslInterpreter {
         }
       } else {
         if (isObject) {
+          await this.strip(parent).update();
           fieldValue = this.strip(parent)[ast.access];
         } else {
           fieldValue = classDescriptor.classConstructor[ast.access];
@@ -617,7 +620,7 @@ export class DslInterpreter {
     const parameter_entries = [];
     if (ast.parameters !== null) {
       for (const p of ast.parameters) {
-        parameter_entries.push([p.parameter, await this.resolve(p.value, env)]);
+        parameter_entries.push([p.parameter, await this.resolve(p.value, null)]);
       }
     }
     const parameters = new Map(parameter_entries);
@@ -766,6 +769,9 @@ export class DslInterpreter {
           }],
         };
       } else {
+        if (env.type === "object") {
+          await targetImplementation.update();
+        }
         return {
           type: "array",
           value: (await targetImplementation[ast.func_name](matchedParameters)).map(
@@ -787,6 +793,9 @@ export class DslInterpreter {
           objectType: returnType.original_type,
         };
       } else {
+        if (env.type === "object") {
+          await targetImplementation.update();
+        }
         return {
           type: "object",
           value: await(targetImplementation[ast.func_name](matchedParameters)),

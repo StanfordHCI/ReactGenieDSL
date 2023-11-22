@@ -12,6 +12,13 @@ export class GenieObject {
     }
   }
 
+  /**
+   * This function is called after the object is created, and called before function calls and property access.
+   */
+  update(): void | Promise<void> {
+    return
+  }
+
   // placeholder, should be replaced by GenieClass decorator
   static _createObject<T extends typeof GenieObject>(
     this: T,

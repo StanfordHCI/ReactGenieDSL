@@ -145,6 +145,18 @@ test("find burger name", async () => {
   });
 });
 
+test("find burger price", async () => {
+  const interpreter = new DslInterpreter(allDescriptors);
+  const funcCallResult = await interpreter.interpret(
+    "Restaurant.current().menu.matching(field: .name, value: \"hamburger\")[0].price"
+  );
+  expect(funcCallResult).toEqual({
+    objectType: "float",
+    type: "object",
+    value: 5
+  });
+});
+
 test("best restaurant", async () => {
   const interpreter = new DslInterpreter(allDescriptors);
   const funcCallResult = await interpreter.interpret(
@@ -195,7 +207,10 @@ test("add hamburger to the order (steps)", async () => {
   const funcCallResult: any[] = await interpreter.interpretSteps(
     "Restaurant.all().equals(field: .priceGrade, value: 1)[0].name"
   );
-  expect((await interpreter.describeSteps(funcCallResult)).reverse()[1]).toEqual({
+  const describeSteps =(await interpreter.describeSteps(
+    funcCallResult[funcCallResult.length - 1].steps
+  )).reverse()
+  expect((describeSteps[1])).toEqual({
     type: "object",
     value: {
       address: "123 Main St, Palo Alto, USA",

@@ -254,6 +254,8 @@ export class Food extends DataClass {
     return Food._all;
   }
 
+  public _price: float;
+
   @GenieKey
   @GenieProperty("Name of the food item")
   public name: string;
@@ -273,9 +275,18 @@ export class Food extends DataClass {
   }) {
     super({});
     this.name = name;
-    this.price = price;
+    this._price = price;
     this.restaurant = restaurant;
     Food._all.push(this);
+  }
+
+  async update() {
+    await new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(void 0);
+      }, 10);
+    });
+    this.price = this._price;
   }
 
   description(): {} {
