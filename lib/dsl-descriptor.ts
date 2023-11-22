@@ -91,7 +91,7 @@ export class DataClass extends GenieObject {
   static All<T extends typeof DataClass>(
     this: T,
     ...args: any[]
-  ): InstanceType<T>[] {
+  ): InstanceType<T>[] | Promise<InstanceType<T>[]> {
     throw new Error(
       "Not implemented. Did you forget to decorate the class with @GenieClass?"
     );
