@@ -530,7 +530,9 @@ export class DslInterpreter {
         }
       } else {
         if (isObject) {
-          await this.strip(parent).update();
+          if (!this.dry_run) {
+            await this.strip(parent).update();
+          }
           fieldValue = this.strip(parent)[ast.access];
         } else {
           fieldValue = classDescriptor.classConstructor[ast.access];
@@ -711,6 +713,11 @@ export class DslInterpreter {
     }
 
     if (isArray) {
+      for (const element of env.value) {
+        if ((element as any).type == "object" && !this.dry_run) {
+          await (element as any).value.update();
+        }
+      }
       matchedParameters["array"] = this.strip(env);
     }
 
@@ -769,7 +776,7 @@ export class DslInterpreter {
           }],
         };
       } else {
-        if (env.type === "object") {
+        if (env.type === "object" && !this.dry_run) {
           await targetImplementation.update();
         }
         return {
@@ -793,7 +800,7 @@ export class DslInterpreter {
           objectType: returnType.original_type,
         };
       } else {
-        if (env.type === "object") {
+        if (env.type === "object" && !this.dry_run) {
           await targetImplementation.update();
         }
         return {
