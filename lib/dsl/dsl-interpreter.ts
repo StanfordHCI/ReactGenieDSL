@@ -384,7 +384,10 @@ export class DslInterpreter {
               value: ast.value,
             };
           } else {
-            await ast.value.update()
+            // if ast.value have update function, call it
+            if (ast.value.update !== undefined) {
+              await ast.value.update()
+            }
             return { type: "object", value: await ast.value.description() };
           }
         } else {
