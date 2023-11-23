@@ -377,7 +377,7 @@ export class DslInterpreter {
         return ast.value;
       case "object":
         if (ast.value !== undefined) {
-          if (ast.objectType == "string") {
+          if (ast.objectType == "string" || ast.objectType == "int" || ast.objectType == "float" || ast.objectType == "number") {
             return {
               type: "object",
               objectType: ast.objectType,
@@ -452,6 +452,7 @@ export class DslInterpreter {
       // don't do anything for primitive types
       case "string":
       case "int":
+      case "float":
       case "boolean":
       case "accessor":
       case "object":
