@@ -5,7 +5,7 @@ export class NlParser {
   private openAiApi: OpenAIApi;
 
   constructor(
-    prompt: PromptGen,
+    public prompt: PromptGen,
     private apiKey: string,
     private basePath: string
   ) {
