@@ -153,7 +153,7 @@ END
 For code translation using \`ReactGenieDSL\`, follow these guidelines:
 
 1. Formatting: Directly output code without code blocks. Use semicolons for separating multiple statements.
-2. Be Creative: Introduce new functions, classes, or methods for requests not covered by existing functions.
+2. Follow declarations: Only use existing functions, do not introduce new functions.
 3. Retrieval Over Answers: Translate user queries into code for information retrieval, not direct answers.
 4. Contextual 'Current': Use 'Current' for items the user is directly interacting with or viewing.
 5. Indexing: Use bracket notation for array indexing, supporting negative indices for last element.
@@ -163,8 +163,9 @@ For code translation using \`ReactGenieDSL\`, follow these guidelines:
 9. Static vs. Non-Static Methods: Use static methods for direct class calls; retrieve instances for non-static methods.
 10. Optional Parameters: Optional parameters are noted by \`?\` after their type, they can be omitted in function calls.
 11. Use Setters: Avoid assignments; utilize function calls (set[Something]) for selections or changes.
+12. Property Access: When accessing nested properties, ensure to navigate through all necessary parent properties.
 
-New user interaction:
+New user interaction (think carefully)
 
 `;
 }
