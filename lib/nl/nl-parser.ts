@@ -83,16 +83,26 @@ export class NlParser {
     result: string
   ): Promise<string | null> {
     const prompt = this.prompt.response_prompt(nl, parsed, result);
-    const response = await this.openAiApi.createCompletion({
-      model: "gpt-3.5-turbo-instruct",
-      prompt: prompt,
-      temperature: 0.7,
-      max_tokens: 512,
+    const response = await this.openAiApi.createChatCompletion({
+      model: "gpt-4",
+      temperature: 0,
       top_p: 1,
-      frequency_penalty: 0,
+      n: 1,
+      stream: false,
+      max_tokens: 256,
       presence_penalty: 0,
-      stop: ["\n", "user:"],
+      frequency_penalty: 0,
+      messages: [
+        {
+          role: "system",
+          content: "only generate one line of response",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
     });
-    return await response.data.choices[0]?.text.trim();
+    return await response.data.choices[0]?.message.content.trim();
   }
 }
