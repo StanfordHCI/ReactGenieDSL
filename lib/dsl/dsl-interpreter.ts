@@ -140,8 +140,8 @@ export class DslInterpreter {
       "between",
       [
         new ParamDescriptor("field", "accessor"),
-        new ParamDescriptor("from", "object"),
-        new ParamDescriptor("to", "object"),
+        new ParamDescriptor("from", "object", false),
+        new ParamDescriptor("to", "object", false),
       ],
       "object[]",
       false
@@ -214,45 +214,49 @@ export class DslInterpreter {
       array,
     }: {
       field: any;
-      from: any;
-      to: any;
+      from?: any;
+      to?: any;
       array: any[];
     }) => {
       console.assert(field.type === "accessor");
       const fieldName = field.field;
       return array.filter((v) => {
-        let first: boolean;
-        let second: boolean;
+        let first: boolean = true;
+        let second: boolean = true;
         let value = v[fieldName];
-        let fromIsPrimitive =
-          typeof from === "string" ||
-          typeof from === "number" ||
-          typeof from === "boolean";
-        let toIsPrimitive =
-          typeof to === "string" ||
-          typeof to === "number" ||
-          typeof to === "boolean";
         let valueIsPrimitive =
           typeof value === "string" ||
           typeof value === "number" ||
           typeof value === "boolean";
-        if (fromIsPrimitive && valueIsPrimitive) {
-          first = value >= from;
-        } else if (fromIsPrimitive && !valueIsPrimitive) {
-          first = value.constructor.compare(value, from) >= 0;
-        } else if (!fromIsPrimitive && valueIsPrimitive) {
-          first = from.constructor.compare(value, from) >= 0;
-        } else {
-          first = from.constructor.compare(value, from) >= 0;
+        if (from !== undefined) {
+          let fromIsPrimitive =
+            typeof from === "string" ||
+            typeof from === "number" ||
+          typeof from === "boolean";
+          if (fromIsPrimitive && valueIsPrimitive) {
+            first = value >= from;
+          } else if (fromIsPrimitive && !valueIsPrimitive) {
+            first = value.constructor.compare(value, from) >= 0;
+          } else if (!fromIsPrimitive && valueIsPrimitive) {
+            first = from.constructor.compare(value, from) >= 0;
+          } else {
+            first = from.constructor.compare(value, from) >= 0;
+          }
         }
-        if (toIsPrimitive && valueIsPrimitive) {
-          second = value <= to;
-        } else if (toIsPrimitive && !valueIsPrimitive) {
-          second = value.constructor.compare(value, to) <= 0;
-        } else if (!toIsPrimitive && valueIsPrimitive) {
-          second = to.constructor.compare(value, to) <= 0;
-        } else {
-          second = to.constructor.compare(value, to) <= 0;
+        if (to !== undefined) {
+          let toIsPrimitive =
+            typeof to === "string" ||
+            typeof to === "number" ||
+            typeof to === "boolean";
+          if (toIsPrimitive && valueIsPrimitive) {
+            second = value <= to;
+          } else if (toIsPrimitive && !valueIsPrimitive) {
+            second = value.constructor.compare(value, to) <= 0;
+          } else if (!toIsPrimitive && valueIsPrimitive) {
+            second = to.constructor.compare(value, to) <= 0;
+          } else {
+            second = to.constructor.compare(value, to) <= 0;
+          }
         }
         return first && second;
       });

@@ -16,8 +16,8 @@ export const array_definition =
   "    // Find items with exact fields in an array\n" +
   "    Array<Type> equals(field: Field, value: Type);\n" +
   "\n" +
-  "    // Find items with the field between two values in an array\n" +
-  "    Array<Type> between(field: Field, from: Type, to: Type);\n" +
+  "    // Find items with the field above from (if provided) and below to (if provided).\n" +
+  "    Array<Type> between(field: Field, from?: Type, to?: Type);\n" +
   "\n" +
   "    // Sort an array based on a specific field in ascending or descending order\n" +
   "    Array<Type> sort(field: Field, ascending: bool);\n" +

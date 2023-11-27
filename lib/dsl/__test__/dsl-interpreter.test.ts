@@ -73,6 +73,18 @@ test("Array between", async () => {
   });
 });
 
+test("Array between one side", async () => {
+  const interpreter = new DslInterpreter(allDescriptors);
+  const funcCallResult = await interpreter.interpret(
+    "Order.all().between(field: .dateTime, from: DateTime.today().addDateOffset(day: -7))[-1].restaurant.name"
+  );
+  expect(funcCallResult).toEqual({
+    objectType: "string",
+    type: "object",
+    value: "McDonald's"
+  });
+});
+
 test("Array equals", async () => {
   const interpreter = new DslInterpreter(allDescriptors);
   const funcCallResult = await interpreter.interpret(
