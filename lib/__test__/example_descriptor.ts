@@ -514,7 +514,7 @@ export class Restaurant extends DataClass {
         (Order.all().length + 1).toString(),
         DateTime.CreateObject({
           year: 2020,
-          month: 1,
+          month: 2,
           day: 1,
           hour: 13,
           minute: 0,
@@ -526,7 +526,7 @@ export class Restaurant extends DataClass {
         DateTime.CreateObject({
           year: 2020,
           month: 2,
-          day: 1,
+          day: 3,
           hour: 14,
           minute: 0,
         }),
@@ -541,7 +541,7 @@ export class Restaurant extends DataClass {
         DateTime.CreateObject({
           year: 2020,
           month: 1,
-          day: 1,
+          day: 4,
           hour: 15,
           minute: 0,
         }),

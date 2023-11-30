@@ -6,14 +6,6 @@ import {
   ParamDescriptor,
 } from "../dsl-descriptor";
 
-async function promiseOneByOne(promiseList: Promise<any>[]) {
-  let result = [];
-  for (const p of promiseList) {
-    result.push(await p);
-  }
-  return result;
-}
-
 function parseType(value_type: string): {
   is_array: boolean;
   original_type: string;
@@ -59,6 +51,11 @@ export class FunctionStaticError extends InterpreterError {
   constructor(public class_name: string, public func_name: string) {
     super(`Function ${class_name}.${func_name} should be static`);
   }
+}
+
+type ElementWithField = {
+  element: any,
+  fieldValue: any,
 }
 
 export class DslInterpreter {
@@ -179,51 +176,45 @@ export class DslInterpreter {
   ];
   // implementations of functions
   private arrayFunctionImplementations: {
-    [name: string]: (...args: any[]) => any;
+    [name: string]: (...args: any[]) => Promise<any>;
   } = {
-    matching: ({
-      field,
+    matching: async ({
       value,
       array,
     }: {
-      field: any;
       value: any;
-      array: any[];
+      array: ElementWithField[];
     }) => {
-      console.assert(field.type === "accessor");
-      const fieldName = field.field;
-      return array.filter((v) => this.matching(v[fieldName], value));
+      return array.filter((element) => {
+        return this.matching(element.fieldValue, value);
+      }).map((v) => v.element);
     },
-    contains: ({
-      field,
+    contains: async({
       value,
       array,
     }: {
-      field: any;
+      field: (element: any) => Promise<any>;
       value: any;
-      array: any[];
+      array: ElementWithField[];
     }) => {
-      console.assert(field.type === "accessor");
-      const fieldName = field.field;
-      return array.filter((v) => this.contains(v[fieldName], value));
+      return array.filter((element) => {
+        return this.contains(element.fieldValue, value);
+      }).map((v) => v.element);
     },
-    between: ({
-      field,
+    between: async ({
       from,
       to,
       array,
     }: {
-      field: any;
       from?: any;
       to?: any;
-      array: any[];
+      array: ElementWithField[];
     }) => {
-      console.assert(field.type === "accessor");
-      const fieldName = field.field;
-      return array.filter((v) => {
+      let newArray = [];
+      for (const element of array) {
         let first: boolean = true;
         let second: boolean = true;
-        let value = v[fieldName];
+        let value = element.fieldValue;
         let valueIsPrimitive =
           typeof value === "string" ||
           typeof value === "number" ||
@@ -258,61 +249,58 @@ export class DslInterpreter {
             second = to.constructor.compare(value, to) <= 0;
           }
         }
-        return first && second;
-      });
+        if (first && second) {
+          newArray.push(element.element);
+        }
+      }
+      return newArray;
     },
-    equals: ({
-      field,
+    equals: async ({
       value,
       array,
     }: {
-      field: any;
       value: any;
-      array: any[];
+      array: ElementWithField[];
     }) => {
-      console.assert(field.type === "accessor");
-      const fieldName = field.field;
-      return array.filter((v) => this.equals(v[fieldName], value));
+      return array.filter((element) => {
+        return this.equals(element.fieldValue, value);
+      }).map((v) => v.element);
     },
-    sort: ({
-      field,
+    sort: async ({
       ascending,
       array,
     }: {
-      field: any;
       ascending: boolean;
-      array: any[];
+      array: ElementWithField[];
     }) => {
-      console.assert(field.type === "accessor");
-      const fieldName = field.field;
       return array.sort((a, b) => {
         if (ascending) {
-          if (a[fieldName] < b[fieldName]) {
+          if (a.fieldValue < b.fieldValue) {
             return -1;
-          } else if (a[fieldName] > b[fieldName]) {
+          } else if (a.fieldValue > b.fieldValue) {
             return 1;
           } else {
             return 0;
           }
         } else {
-          if (a[fieldName] < b[fieldName]) {
+          if (a.fieldValue < b.fieldValue) {
             return 1;
-          } else if (a[fieldName] > b[fieldName]) {
+          } else if (a.fieldValue > b.fieldValue) {
             return -1;
           } else {
             return 0;
           }
         }
-      });
+      }).map((v) => v.element);
     },
-    index: ({ index, array }: { index: any; array: any[] }) => {
+    index: async ({ index, array }: { index: any; array: any[] }) => {
       console.assert(typeof index === "number");
       if (index < 0) {
         index = array.length + index;
       }
       return array[index];
     },
-    length: ({ array }: { array: any[] }) => {
+    length: async ({ array }: { array: any[] }) => {
       return array.length;
     }
   };
@@ -720,15 +708,6 @@ export class DslInterpreter {
       }
     }
 
-    if (isArray) {
-      for (const element of env.value) {
-        if ((element as any).type == "object" && !this.dry_run) {
-          await (element as any).value.update();
-        }
-      }
-      matchedParameters["array"] = this.strip(env);
-    }
-
     // function is a class constructor
     if (env === null) {
       const classDescriptor = this.classDescriptors.find(
@@ -751,26 +730,65 @@ export class DslInterpreter {
 
     const returnType = parseType(funcDescriptor.returnType);
 
-    const targetImplementation = isArray
-      ? this.arrayFunctionImplementations
-      : this.strip(env);
-
     if (isArray) {
-      if (ast.func_name != "index" && ast.func_name != "length") {
-        const classDescriptor = this.classDescriptors.find(
-          (c) => c.className === env.value[0].objectType
-        );
-        if (classDescriptor === undefined) {
-          throw new ClassMissingError(env.value[0].objectType)
+      for (const element of env.value) {
+        if ((element as any).type == "object" && !this.dry_run) {
+          await (element as any).value.update();
         }
-        const fieldDescriptor = Array.from(classDescriptor.fields).find(
-            (f) => f.field === matchedParameters["field"].field
-        );
-        if (fieldDescriptor === undefined) {
-          throw new FieldMissingError(env.value[0].objectType, matchedParameters["field"].field)
+      }
+      matchedParameters["array"] = this.strip(env);
+      if (matchedParameters["field"] !== undefined) {
+        function constructAccess(accessor: any, parent: any) {
+          if (typeof accessor == "string") {
+            return {
+              type: "access",
+              parent: parent,
+              access: accessor,
+            };
+          } else {
+            if (accessor.type == "access") {
+              return {
+                type: "access",
+                parent: constructAccess(accessor.parent, parent),
+                access: accessor.access,
+              };
+            }
+          }
+        }
+        const field = matchedParameters["field"].field;
+        if (this.dry_run) {
+          // dry run for accessor
+          await this.resolve(constructAccess(field, {
+                  type: "object",
+                  value: null,
+                  objectType: returnType.original_type,
+                }), null)
+        } else {
+          if (ast.func_name != "index" && ast.func_name != "length") {
+            const originalArray = matchedParameters["array"];
+            const array = [];
+            for (const element of originalArray) {
+              const fieldValue = await this.strip(await this.resolve(
+                constructAccess(field, {
+                  type: "object",
+                  value: element,
+                  objectType: returnType.original_type,
+                })
+              ));
+              array.push({
+                element: element,
+                fieldValue: fieldValue,
+              });
+            }
+            matchedParameters["array"] = array;
+          }
         }
       }
     }
+
+    const targetImplementation = isArray
+      ? this.arrayFunctionImplementations
+      : this.strip(env);
 
     // call the function
     if (returnType.is_array) {

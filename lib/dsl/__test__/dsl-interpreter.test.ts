@@ -85,6 +85,18 @@ test("Array between one side", async () => {
   });
 });
 
+test("Array between one side deep accessor", async () => {
+  const interpreter = new DslInterpreter(allDescriptors);
+  const funcCallResult = await interpreter.interpret(
+    "Order.all().between(field: .dateTime.day, from: 2, to: 3)[-1].dateTime.day"
+  );
+  expect(funcCallResult).toEqual({
+    "objectType": "int",
+    "type": "object",
+    "value": 3
+  });
+});
+
 test("Array equals", async () => {
   const interpreter = new DslInterpreter(allDescriptors);
   const funcCallResult = await interpreter.interpret(
