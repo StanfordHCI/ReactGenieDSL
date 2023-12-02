@@ -504,17 +504,18 @@ export function GenieClass(comment: string = "") {
         return allObjects;
       }
 
-      target.All = All;
-
-      // append additional function descriptor to class descriptor
-      target.ClassDescriptor.functions.add(
-        new FuncDescriptor(
-          "All",
-          [],
-          target.ClassDescriptor.className + "[]",
-          true
-        )
-      );
+      if (!target.All) {
+        target.All = All;
+        // append additional function descriptor to class descriptor
+        target.ClassDescriptor.functions.add(
+          new FuncDescriptor(
+            "All",
+            [],
+            target.ClassDescriptor.className + "[]",
+            true
+          )
+        );
+      }
     }
 
     if (genieClassModifier) {

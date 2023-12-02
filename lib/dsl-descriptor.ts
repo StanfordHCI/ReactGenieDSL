@@ -19,6 +19,13 @@ export class GenieObject {
     return
   }
 
+  /**
+   * This function is called object's property is updated.
+   */
+  sync(): void | Promise<void> {
+    return
+  }
+
   // placeholder, should be replaced by GenieClass decorator
   static _createObject<T extends typeof GenieObject>(
     this: T,
