@@ -504,7 +504,7 @@ export function GenieClass(comment: string = "") {
         return allObjects;
       }
 
-      if (!target.All) {
+      if (target.All == DataClass.All) {
         target.All = All;
         // append additional function descriptor to class descriptor
         target.ClassDescriptor.functions.add(
