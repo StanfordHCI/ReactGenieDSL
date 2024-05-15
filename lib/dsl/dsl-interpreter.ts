@@ -487,10 +487,14 @@ export class DslInterpreter {
         if (parent.type == "array") {
           const arrayValue = [];
           for (const v of parent.value) {
-            arrayValue.push(await this.resolveAccess({
-              ...ast,
-              parent: v
-            }, env));
+            try {
+              arrayValue.push(await this.resolveAccess({
+                ...ast,
+                parent: v
+              }, env));
+            } catch (e) {
+              console.log(e);
+            }
           }
           let objType = null
           if (arrayValue.length > 0) {
